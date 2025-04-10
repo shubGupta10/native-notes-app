@@ -1,0 +1,18 @@
+# Only include the stuff we actually need
+*.log
+node_modules
+.expo
+.expo-shared
+.git
+.vscode
+.env
+AppData
+Desktop
+Documents
+Downloads
+Pictures
+Videos
+OneDrive
+*.zip
+*.tar.gz
+.history
