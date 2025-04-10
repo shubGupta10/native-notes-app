@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/useAuthStore'
 import { fetchNotesByUserId } from '@/lib/appwrite'
 import { useRouter } from 'expo-router'
-import { Tag } from 'lucide-react-native'
+import { Edit2Icon, Tag } from 'lucide-react-native'
+import DeleteNote from '@/components/DeleteNote' 
 
 type Note = {
     $id: string
@@ -19,25 +20,25 @@ const FetchNotes = () => {
     const [loading, setLoading] = useState(true)
     const [selectedTag, setSelectedTag] = useState<string | null>(null)
 
-    useEffect(() => {
-        const handleFetchNotes = async () => {
-            if (user?.$id) {
-                setLoading(true)
-                try {
-                    const response = await fetchNotesByUserId(user.$id)
-                    setNotes(response.map(doc => ({
-                        $id: doc.$id,
-                        title: doc.title,
-                        category: doc.category,
-                        content: doc.content,
-                    })))
-                } catch (error) {
-                    console.error('Error fetching notes:', error)
-                }
-                setLoading(false)
+    const handleFetchNotes = async () => {
+        if (user?.$id) {
+            setLoading(true)
+            try {
+                const response = await fetchNotesByUserId(user.$id)
+                setNotes(response.map(doc => ({
+                    $id: doc.$id,
+                    title: doc.title,
+                    category: doc.category,
+                    content: doc.content,
+                })))
+            } catch (error) {
+                console.error('Error fetching notes:', error)
             }
+            setLoading(false)
         }
+    }
 
+    useEffect(() => {
         handleFetchNotes()
     }, [user])
 
@@ -52,6 +53,16 @@ const FetchNotes = () => {
         return content.substring(0, maxLength) + '...'
     }
 
+    const handleDeleteSuccess = () => {
+        handleFetchNotes()
+    }
+
+    const handleEdit = (documentId: string) => {
+        router.push({
+            pathname: '/edit/[documentId]',
+            params: {documentId}
+        })
+    }
 
     if (loading) {
         return (
@@ -74,7 +85,7 @@ const FetchNotes = () => {
 
 
             {/* Notes list */}
-            <ScrollView contentContainerStyle={{ paddingBottom: 80 }} className="space-y-5">
+            <ScrollView className="space-y-5">
                 {filteredNotes.map((note) => (
                     <TouchableOpacity
                         key={note.$id}
@@ -83,9 +94,23 @@ const FetchNotes = () => {
                     >
                         <View className="flex-row justify-between items-start">
                             <Text className="text-lg font-semibold text-gray-800 flex-1 mb-1">{note.title}</Text>
-                            <View className="flex-row items-center bg-gray-100 px-2 py-1 rounded">
-                                <Tag size={12} color="#4285F4" />
-                                <Text className="text-xs text-gray-600 ml-1">{note.category}</Text>
+                            <View className="flex-row items-center">
+                                <View className="flex-row items-center bg-gray-100 px-2 py-1 rounded mr-2">
+                                    <Tag size={12} color="#4285F4" />
+                                    <Text className="text-xs text-gray-600 ml-1">{note.category}</Text>
+                                </View>
+                                <TouchableOpacity 
+                                    onPress={() => handleEdit(note.$id)}
+                                    className="p-2 rounded-full mr-1"
+                                    activeOpacity={0.7}
+                                >
+                                    <Edit2Icon size={20} color="#3B82F6" />
+                                </TouchableOpacity>
+                                <DeleteNote 
+                                    userId={user?.$id || ''} 
+                                    documentId={note.$id}
+                                    onDeleteSuccess={handleDeleteSuccess}
+                                />
                             </View>
                         </View>
                         <Text className="text-gray-600">{truncateContent(note.content)}</Text>

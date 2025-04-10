@@ -39,7 +39,7 @@ const Create = () => {
 
     return (
         <AuthWrapper redirectToLogin={true}>
-            <SafeAreaView className="flex-1 bg-gray-50">
+            <SafeAreaView className="flex-1 bg-white">
                 <StatusBar style="dark" />
                 <View className="flex-1 px-6">
                     <ScrollView 

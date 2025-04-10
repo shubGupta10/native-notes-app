@@ -14,7 +14,7 @@ const Index = () => {
   // Logged-in state
   if (user) {
     return (
-      <SafeAreaView className="flex-1 bg-gray-50">
+      <SafeAreaView className="flex-1 bg-white">
         <StatusBar style="dark" />
         <View className="px-4 py-4 flex-row justify-between items-center bg-white border-b border-gray-200">
           <View>
@@ -35,10 +35,10 @@ const Index = () => {
 
   // Not logged-in welcome screen
   return (
-    <SafeAreaView edges={['top']} className="flex-1 bg-white">
+    <SafeAreaView className='flex-1 bg-white'>
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View className="flex-1 px-6 pt-12 pb-12">
+        <View className="flex-1 px-6 pt-2 pb-2">
           {/* Header */}
           <View className="items-center mb-8">
             <Image 
@@ -109,7 +109,7 @@ const Index = () => {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
   )
 }
 

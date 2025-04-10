@@ -1,13 +1,13 @@
 import {
     Alert,
     Image,
-    SafeAreaView,
     ScrollView,
     Text,
     TouchableOpacity,
     View,
     ActivityIndicator,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -128,6 +128,7 @@ const Profile = () => {
     if (!user) {
         return (
             <AuthWrapper redirectToLogin={true}>
+               
                 <View className="flex-1 justify-center items-center bg-white">
                     <Text className="text-xl font-rubik-bold mb-4">Please log in to view your profile</Text>
                     <TouchableOpacity 

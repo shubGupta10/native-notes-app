@@ -2,6 +2,12 @@ import { Account, Avatars, Client, OAuthProvider, Databases, ID, Permission, Rol
 import * as Linking from 'expo-linking'
 import { openAuthSessionAsync } from "expo-web-browser";
 
+interface UpdatedField {
+  title?: string;
+  category?: string;
+  content?: string;
+}
+
 export const config = {
   platform: "com.note.nest",
   endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT,
@@ -133,7 +139,7 @@ export async function saveNote({
   }
 }
 
-export async function fetchNotesByUserId(userId: string){
+export async function fetchNotesByUserId(userId: string) {
   try {
     const response = await databases.listDocuments(
       process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
@@ -146,5 +152,81 @@ export async function fetchNotesByUserId(userId: string){
   } catch (error) {
     console.error("Failed to save notes", error);
     return [];
+  }
+}
+
+export async function fetchNoteById(documentId: string){
+  try {
+    const document = await databases.getDocument(
+      process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+      process.env.EXPO_PUBLIC_APPWRITE_COLLECTION_ID!,
+      documentId
+    )
+
+    if(document.$id !== documentId){
+      console.warn("Document does not exist")
+    }
+
+    return document;
+  } catch (error) {
+    console.error("Failed to fetch note by Id", error);
+    return null;
+  }
+}
+
+export async function deleteNoteByUserIdAndDocumentId(userId: string, documentId: string) {
+  try {
+    const document = await databases.getDocument(
+      process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+      process.env.EXPO_PUBLIC_APPWRITE_COLLECTION_ID!,
+      documentId
+    );
+
+    if (document.userId !== userId) {
+      console.warn("Unauthorized: userId does not match this document ❌");
+      return;
+    }
+
+    await databases.deleteDocument(
+      process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+      process.env.EXPO_PUBLIC_APPWRITE_COLLECTION_ID!,
+      documentId
+    );
+
+    console.log("Note deleted successfully ✅");
+  } catch (error) {
+    console.error("Delete Error:", error);
+  }
+}
+
+export async function editNoteByUserIdAndDocumentId(
+  userId: string,
+  documentId: string,
+  updatedField: UpdatedField
+): Promise<any> {
+  try {
+    const document = await databases.getDocument(
+      process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+      process.env.EXPO_PUBLIC_APPWRITE_COLLECTION_ID!,
+      documentId
+    );
+
+    if (document.userId !== userId) {
+      console.warn("Unauthorized: userId does not match this document");
+      return;
+    }
+
+    const updatedDoc = await databases.updateDocument(
+      process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+      process.env.EXPO_PUBLIC_APPWRITE_COLLECTION_ID!,
+      documentId,
+      updatedField
+    );
+
+    console.log("Note updated successfully");
+    return updatedDoc;
+
+  } catch (error) {
+    console.error("Update Error:", error);
   }
 }
