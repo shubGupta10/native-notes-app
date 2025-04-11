@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { useAuthStore } from '@/store/useAuthStore'
 import { fetchNotesByUserId } from '@/lib/appwrite'
 import { useRouter } from 'expo-router'
-import { Edit2Icon, RefreshCw, Tag, Search, X } from 'lucide-react-native'
+import { FontAwesome, Feather, MaterialIcons, Ionicons } from '@expo/vector-icons'
 import DeleteNote from '@/components/DeleteNote'
 import SearchInNotes from "@/components/SearchInNotes";
 
@@ -117,7 +117,7 @@ const FetchNotes = () => {
                             onPress={() => setSelectedTag(null)}
                             className="ml-2"
                         >
-                            <X size={16} color="#6B7280" />
+                            <Ionicons name="close" size={16} color="#6B7280" />
                         </TouchableOpacity>
                     )}
                 </View>
@@ -129,7 +129,7 @@ const FetchNotes = () => {
                         disabled={refreshing}
                         className={`${refreshing ? 'opacity-50' : ''} p-2 bg-gray-100 rounded-full`}
                     >
-                        <RefreshCw size={18} color="#4285F4" />
+                        <Feather name="refresh-cw" size={18} color="#4285F4" />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -164,7 +164,7 @@ const FetchNotes = () => {
                                 onPress={() => setSelectedTag(note.category)}
                                 className="flex-row items-center bg-blue-50 px-3 py-1 rounded-full mr-2"
                             >
-                                <Tag size={12} color="#4285F4" />
+                                <Feather name="tag" size={12} color="#4285F4" />
                                 <Text className="text-xs text-blue-600 font-medium ml-1">{note.category}</Text>
                             </TouchableOpacity>
 
@@ -174,7 +174,7 @@ const FetchNotes = () => {
                                     className="p-2 rounded-full bg-gray-100"
                                     activeOpacity={0.7}
                                 >
-                                    <Edit2Icon size={16} color="#3B82F6" />
+                                    <Feather name="edit-2" size={16} color="#3B82F6" />
                                 </TouchableOpacity>
 
                                 <DeleteNote
@@ -189,7 +189,7 @@ const FetchNotes = () => {
                 ListEmptyComponent={() => (
                     <View className="items-center justify-center py-16">
                         <View className="bg-gray-100 p-4 rounded-full mb-4">
-                            <Search size={24} color="#9CA3AF" />
+                            <Feather name="search" size={24} color="#9CA3AF" />
                         </View>
                         <Text className="text-center text-gray-500 mb-2 text-lg font-medium">
                             {searchQuery
