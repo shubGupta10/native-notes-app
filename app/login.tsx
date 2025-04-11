@@ -1,6 +1,6 @@
 import { View, Text, TouchableOpacity, Alert, ActivityIndicator, Image, SafeAreaView } from 'react-native';
 import React, { useEffect } from 'react';
-import { ArrowLeft } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -60,7 +60,7 @@ const Login = () => {
                     onPress={() => router.back()}
                     className="p-2"
                 >
-                    <ArrowLeft size={24} color="#4285F4" />
+                    <Ionicons name="arrow-back" size={24} color="#4285F4" />
                 </TouchableOpacity>
             </View>
             

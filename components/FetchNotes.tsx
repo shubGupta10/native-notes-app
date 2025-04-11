@@ -84,6 +84,12 @@ const FetchNotes = () => {
         })
     }
 
+    const handleViewNote = (documentId: string) => {
+        router.push({
+            pathname: "/view/[documentId]",
+            params: {documentId}
+        })
+    }
 
     if (loading && !refreshing) {
         return (
@@ -142,39 +148,43 @@ const FetchNotes = () => {
                 data={filteredNotes}
                 keyExtractor={item => item.$id}
                 renderItem={({ item: note }) => (
-                    <TouchableOpacity
-                        className="border mb-3 rounded-lg p-4 border-gray-200 bg-white shadow-sm"
-                        activeOpacity={0.7}
-                        onPress={() => handleEdit(note.$id)}
-                    >
-                        <View className="flex-row justify-between items-start">
-                            <Text className="text-lg font-semibold text-gray-800 flex-1 mb-1">{note.title}</Text>
-                            <View className="flex-row items-center">
-                                <View className="flex-row items-center bg-blue-50 px-3 py-1 rounded-full mr-2">
-                                    <Tag size={12} color="#4285F4" />
-                                    <Text className="text-xs text-blue-600 font-medium ml-1">{note.category}</Text>
-                                </View>
+                    <View className="border mb-3 rounded-lg p-4 border-gray-200 bg-white shadow-sm">
+                        <TouchableOpacity onPress={() => handleViewNote(note.$id)} activeOpacity={0.7}>
+                            <Text className="text-lg font-semibold text-gray-800 flex-1 mb-1">
+                                {note.title}
+                            </Text>
+
+                            <Text className="text-gray-600 mt-2">
+                                {truncateContent(note.content)}
+                            </Text>
+                        </TouchableOpacity>
+
+                        <View className="flex-row justify-between items-start mt-2">
+                            <TouchableOpacity
+                                onPress={() => setSelectedTag(note.category)}
+                                className="flex-row items-center bg-blue-50 px-3 py-1 rounded-full mr-2"
+                            >
+                                <Tag size={12} color="#4285F4" />
+                                <Text className="text-xs text-blue-600 font-medium ml-1">{note.category}</Text>
+                            </TouchableOpacity>
+
+                            <View className="flex-row items-center space-x-1">
                                 <TouchableOpacity
-                                    onPress={(e) => {
-                                        e.stopPropagation();
-                                        handleEdit(note.$id);
-                                    }}
+                                    onPress={() => handleEdit(note.$id)}
                                     className="p-2 rounded-full bg-gray-100"
                                     activeOpacity={0.7}
                                 >
                                     <Edit2Icon size={16} color="#3B82F6" />
                                 </TouchableOpacity>
-                                <View className="ml-1">
-                                    <DeleteNote
-                                        userId={user?.$id || ''}
-                                        documentId={note.$id}
-                                        onDeleteSuccess={handleDeleteSuccess}
-                                    />
-                                </View>
+
+                                <DeleteNote
+                                    userId={user?.$id || ''}
+                                    documentId={note.$id}
+                                    onDeleteSuccess={handleDeleteSuccess}
+                                />
                             </View>
                         </View>
-                        <Text className="text-gray-600 mt-1">{truncateContent(note.content)}</Text>
-                    </TouchableOpacity>
+                    </View>
                 )}
                 ListEmptyComponent={() => (
                     <View className="items-center justify-center py-16">

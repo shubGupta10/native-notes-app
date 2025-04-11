@@ -1,27 +1,23 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { Home, PlusCircle, User } from 'lucide-react-native';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { View,  Platform, Dimensions } from 'react-native';
 import Animated from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 
 function TabLayout() {
-    const getTabBarIcon = (Icon: any, focused: any) => {
-        return (
-            <View className="flex items-center justify-center">
-                <Animated.View 
-                    className={`${focused ? 'bg-white' : ''}  rounded-full`}
-                >
-                    <Icon 
-                        color={focused ? "#2563EB" : "#64748B"} 
-                        size={focused ? 24 : 22} 
-                        strokeWidth={focused ? 2.5 : 2}
-                    />
-                </Animated.View>
-            </View>
-        );
-    };
+    const getTabBarIcon = (iconLibrary: any, iconName: string, focused: boolean) => (
+        <View className="flex items-center justify-center">
+            <Animated.View className={`${focused ? 'bg-white' : ''} rounded-full`}>
+                {React.createElement(iconLibrary, {
+                    name: iconName,
+                    color: focused ? "#2563EB" : "#64748B",
+                    size: focused ? 24 : 22,
+                })}
+            </Animated.View>
+        </View>
+    );
 
     // Calculate tab width based on screen width
     const tabWidth = Math.min(width / 3, 120);
@@ -74,21 +70,21 @@ function TabLayout() {
                     name="index"
                     options={{
                         title: "Home",
-                        tabBarIcon: ({ focused }) => getTabBarIcon(Home, focused),
+                        tabBarIcon: ({ focused }) => getTabBarIcon(Ionicons, "home", focused),
                     }}
                 />
                 <Tabs.Screen
                     name="create"
                     options={{
                         title: "Create",
-                        tabBarIcon: ({ focused }) => getTabBarIcon(PlusCircle, focused),
+                        tabBarIcon: ({ focused }) => getTabBarIcon(Feather, "plus-circle", focused),
                     }}
                 />
                 <Tabs.Screen
                     name="profile"
                     options={{
                         title: "Profile",
-                        tabBarIcon: ({ focused }) => getTabBarIcon(User, focused),
+                        tabBarIcon: ({ focused }) =>  getTabBarIcon(Feather, "user", focused),
                     }}
                 />
             </Tabs>

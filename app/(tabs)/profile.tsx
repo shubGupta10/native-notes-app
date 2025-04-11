@@ -11,15 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
-import {
-    ArrowRight,
-    Bell,
-    Calendar,
-    Edit2,
-    LogOut,
-    Wallet,
-    UserCheck, PlusIcon
-} from 'lucide-react-native';
+import { Feather } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import AuthWrapper from "@/components/AuthWrapper";
 
@@ -58,7 +50,7 @@ const SettingsItem = ({
             </View>
         </View>
 
-        {showArrow && <ArrowRight size={20} color="#718096" />}
+        {showArrow && <Feather name="chevron-right" size={16} color="#9CA3AF" />}
     </TouchableOpacity>
 );
 
@@ -135,7 +127,7 @@ const Profile = () => {
                         onPress={handleNavigateToLogin}
                         className="flex-row items-center bg-black py-3 px-6 rounded-full"
                     >
-                        <LogOut size={20} color="#FFF" />
+                        <Feather name="log-out" size={20} color="#EF4444" />
                         <Text className="text-white ml-2 font-rubik-medium">Log In</Text>
                     </TouchableOpacity>
                 </View>
@@ -154,7 +146,7 @@ const Profile = () => {
                 <View className="flex flex-row items-center justify-between px-4 py-4">
                     <Text className="text-2xl font-rubik-bold">My Profile</Text>
                     <TouchableOpacity className="bg-gray-100 p-2 rounded-full">
-                        <Bell size={20} color="#333" />
+                        <Feather name="bell" size={20} color="#333" />
                     </TouchableOpacity>
                 </View>
 
@@ -167,14 +159,14 @@ const Profile = () => {
                                 className="w-24 h-24 rounded-full"
                             />
                             <TouchableOpacity className="absolute bottom-0 right-0 bg-white p-1 rounded-full border border-gray-200">
-                                <Edit2 size={16} color="#333" />
+                                <Feather name="edit-2" size={16} color="#333" />
                             </TouchableOpacity>
                         </View>
                         <View className="ml-4 flex-1">
                             <Text className="text-2xl font-rubik-bold">{user.name}</Text>
                             <Text className="text-gray-500">{user.email}</Text>
                             <View className="flex-row items-center mt-1">
-                                <UserCheck size={14} color={user?.emailVerification ? "#10B981" : "#EF4444"} />
+                                <Feather name={user?.emailVerification ? "check-circle" : "x-circle"} size={14} color={user?.emailVerification ? "#10B981" : "#EF4444"} />
                                 <Text className="text-xs ml-1 text-gray-500">
                                     {user?.emailVerification ? "Verified" : "Not Verified"}
                                 </Text>
@@ -193,19 +185,21 @@ const Profile = () => {
                     <Text className="text-lg font-rubik-medium mb-2 text-gray-600">Activities</Text>
                     <View className="bg-white rounded-xl overflow-hidden mb-6">
                         <SettingsItem
-                            icon={<Calendar size={20} color="#4F46E5" />}
+                            icon={<Feather name="calendar" size={20} color="#4F46E5" />}
                             title="My Notes"
                             subtitle="Create and view your notes"
                             onPress={() => router.push('/')}
                         />
+
                         <SettingsItem
-                            icon={<PlusIcon size={20} color="#4F46E5" />}
+                            icon={<Feather name="plus" size={20} color="#4F46E5" />}
                             title="Create"
                             subtitle="Create new note"
                             onPress={() => router.push('/create')}
                         />
+
                         <SettingsItem
-                            icon={<LogOut size={20} color="#EF4444" />}
+                            icon={<Feather name="log-out" size={20} color="#EF4444" />}
                             title="Logout"
                             subtitle="Sign out from your account"
                             textStyle="text-red-500"

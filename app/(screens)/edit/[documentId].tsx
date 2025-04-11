@@ -1,10 +1,11 @@
-import { SafeAreaView, ScrollView, Text, TextInput, TouchableOpacity, View, Alert, Platform } from 'react-native'
+import { ScrollView, Text, TextInput, TouchableOpacity, View, Alert, Platform } from 'react-native'
 import React, { useState, useEffect } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import AuthWrapper from '@/components/AuthWrapper'
 import { useAuthStore } from '@/store/useAuthStore'
 import { StatusBar } from 'expo-status-bar'
 import { editNoteByUserIdAndDocumentId, fetchNoteById } from '@/lib/appwrite'
+import {SafeAreaView} from "react-native-safe-area-context";
 
 type UpdatedField = {
   title?: string
