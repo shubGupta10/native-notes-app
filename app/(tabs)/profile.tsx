@@ -11,14 +11,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/useAuthStore";
-import { 
-    ArrowRight, 
-    Bell, 
-    Calendar, 
-    Edit2, 
-    LogOut, 
-    Wallet, 
-    UserCheck
+import {
+    ArrowRight,
+    Bell,
+    Calendar,
+    Edit2,
+    LogOut,
+    Wallet,
+    UserCheck, PlusIcon
 } from 'lucide-react-native';
 import { useRouter } from "expo-router";
 import AuthWrapper from "@/components/AuthWrapper";
@@ -196,13 +196,13 @@ const Profile = () => {
                             icon={<Calendar size={20} color="#4F46E5" />}
                             title="My Notes"
                             subtitle="Create and view your notes"
-                            onPress={() => router.push('/create')}
+                            onPress={() => router.push('/')}
                         />
                         <SettingsItem
-                            icon={<Wallet size={20} color="#4F46E5" />}
-                            title="Home"
-                            subtitle="Return to home screen"
-                            onPress={() => router.push('/')}
+                            icon={<PlusIcon size={20} color="#4F46E5" />}
+                            title="Create"
+                            subtitle="Create new note"
+                            onPress={() => router.push('/create')}
                         />
                         <SettingsItem
                             icon={<LogOut size={20} color="#EF4444" />}

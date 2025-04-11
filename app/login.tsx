@@ -67,8 +67,8 @@ const Login = () => {
             <View className="flex-1 px-6 justify-center">
                 {/* App Logo */}
                 <View className="items-center mb-10">
-                    <Image 
-                        source={{ uri: "https://img.icons8.com/fluency/96/000000/note.png" }}
+                    <Image
+                        source={require('@/assets/images/home-image.png')}
                         className="w-24 h-24 mb-4"
                     />
                     <Text className="text-3xl font-bold text-gray-800">Welcome Back</Text>

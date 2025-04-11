@@ -41,9 +41,9 @@ const Index = () => {
         <View className="flex-1 px-6 pt-2 pb-2">
           {/* Header */}
           <View className="items-center mb-8">
-            <Image 
-              source={{ uri: "https://img.icons8.com/fluency/96/000000/note.png" }}
-              className="w-24 h-24 mb-4"
+            <Image
+                source={require('@/assets/images/home-image.png')}
+                className="w-24 h-24 mb-4"
             />
             <Text className="text-4xl font-bold text-gray-800">NoteNest</Text>
             <Text className="text-gray-500 text-center mt-2 text-lg">

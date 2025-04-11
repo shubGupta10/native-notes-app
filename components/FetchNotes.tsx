@@ -1,10 +1,11 @@
-import { ScrollView, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import { ScrollView, Text, View, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native'
+import React, { useEffect, useState, useCallback } from 'react'
 import { useAuthStore } from '@/store/useAuthStore'
 import { fetchNotesByUserId } from '@/lib/appwrite'
 import { useRouter } from 'expo-router'
-import { Edit2Icon, Tag } from 'lucide-react-native'
-import DeleteNote from '@/components/DeleteNote' 
+import { Edit2Icon, RefreshCw, Tag, Search, X } from 'lucide-react-native'
+import DeleteNote from '@/components/DeleteNote'
+import SearchInNotes from "@/components/SearchInNotes";
 
 type Note = {
     $id: string
@@ -18,35 +19,54 @@ const FetchNotes = () => {
     const router = useRouter()
     const [notes, setNotes] = useState<Note[]>([])
     const [loading, setLoading] = useState(true)
+    const [refreshing, setRefreshing] = useState(false)
     const [selectedTag, setSelectedTag] = useState<string | null>(null)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [categories, setCategories] = useState<string[]>([])
 
-    const handleFetchNotes = async () => {
+    const handleFetchNotes = useCallback(async () => {
         if (user?.$id) {
             setLoading(true)
             try {
                 const response = await fetchNotesByUserId(user.$id)
-                setNotes(response.map(doc => ({
+                const fetchedNotes = response.map(doc => ({
                     $id: doc.$id,
                     title: doc.title,
                     category: doc.category,
                     content: doc.content,
-                })))
+                }))
+                setNotes(fetchedNotes)
+
+                // Extract unique categories
+                const uniqueCategories = Array.from(new Set(fetchedNotes.map(note => note.category)))
+                setCategories(uniqueCategories)
             } catch (error) {
                 console.error('Error fetching notes:', error)
+            } finally {
+                setLoading(false)
+                setRefreshing(false)
             }
-            setLoading(false)
         }
-    }
+    }, [user?.$id])
 
     useEffect(() => {
+        if (user?.$id) {
+            handleFetchNotes();
+        }
+    }, [user, handleFetchNotes]);
+
+    const handleRefresh = () => {
+        setRefreshing(true)
         handleFetchNotes()
-    }, [user])
+    }
 
-    const categories = Array.from(new Set(notes.map(note => note.category)))
-
-    const filteredNotes = selectedTag
-        ? notes.filter(note => note.category === selectedTag)
-        : notes
+    // Filter notes based on category and search
+    const filteredNotes = notes.filter(note => {
+        const matchCategory = selectedTag ? note.category === selectedTag : true;
+        const matchSearch = note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            note.content.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchCategory && matchSearch;
+    })
 
     const truncateContent = (content: string, maxLength = 80) => {
         if (content.length <= maxLength) return content
@@ -64,7 +84,8 @@ const FetchNotes = () => {
         })
     }
 
-    if (loading) {
+
+    if (loading && !refreshing) {
         return (
             <View className="flex-1 justify-center items-center bg-white">
                 <ActivityIndicator size="large" color="#4285F4" />
@@ -76,53 +97,102 @@ const FetchNotes = () => {
     return (
         <View className="flex-1 bg-white px-4 pt-4">
             {/* Header */}
-            <View className="flex-row justify-between items-center mb-6">
-                <Text className="text-2xl font-bold text-gray-800">
-                    {selectedTag ? `${selectedTag}` : 'All Notes'}
-                </Text>
-                <Text className="text-gray-500">{filteredNotes.length} notes</Text>
+            <View className="mb-4">
+                <SearchInNotes searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+            </View>
+
+            <View className="flex-row justify-between items-center mb-4">
+                <View className="flex-row items-center">
+                    <Text className="text-2xl font-bold text-gray-800">
+                        {selectedTag ? `${selectedTag}` : 'All Notes'}
+                    </Text>
+                    {selectedTag && (
+                        <TouchableOpacity
+                            onPress={() => setSelectedTag(null)}
+                            className="ml-2"
+                        >
+                            <X size={16} color="#6B7280" />
+                        </TouchableOpacity>
+                    )}
+                </View>
+
+                <View className="flex-row items-center">
+                    <Text className="text-gray-500 mr-3">{filteredNotes.length} notes</Text>
+                    <TouchableOpacity
+                        onPress={handleRefresh}
+                        disabled={refreshing}
+                        className={`${refreshing ? 'opacity-50' : ''} p-2 bg-gray-100 rounded-full`}
+                    >
+                        <RefreshCw size={18} color="#4285F4" />
+                    </TouchableOpacity>
+                </View>
             </View>
 
 
             {/* Notes list */}
-            <ScrollView className="space-y-5">
-                {filteredNotes.map((note) => (
+            {refreshing && (
+                <ActivityIndicator
+                    size="small"
+                    color="#4285F4"
+                    style={{ marginVertical: 10 }}
+                />
+            )}
+
+            <FlatList
+                data={filteredNotes}
+                keyExtractor={item => item.$id}
+                renderItem={({ item: note }) => (
                     <TouchableOpacity
-                        key={note.$id}
-                        className="border mb-3 rounded-lg p-4 border-gray-400 bg-white"
-                        activeOpacity={0.9}
+                        className="border mb-3 rounded-lg p-4 border-gray-200 bg-white shadow-sm"
+                        activeOpacity={0.7}
+                        onPress={() => handleEdit(note.$id)}
                     >
                         <View className="flex-row justify-between items-start">
                             <Text className="text-lg font-semibold text-gray-800 flex-1 mb-1">{note.title}</Text>
                             <View className="flex-row items-center">
-                                <View className="flex-row items-center bg-gray-100 px-2 py-1 rounded mr-2">
+                                <View className="flex-row items-center bg-blue-50 px-3 py-1 rounded-full mr-2">
                                     <Tag size={12} color="#4285F4" />
-                                    <Text className="text-xs text-gray-600 ml-1">{note.category}</Text>
+                                    <Text className="text-xs text-blue-600 font-medium ml-1">{note.category}</Text>
                                 </View>
-                                <TouchableOpacity 
-                                    onPress={() => handleEdit(note.$id)}
-                                    className="p-2 rounded-full mr-1"
+                                <TouchableOpacity
+                                    onPress={(e) => {
+                                        e.stopPropagation();
+                                        handleEdit(note.$id);
+                                    }}
+                                    className="p-2 rounded-full bg-gray-100"
                                     activeOpacity={0.7}
                                 >
-                                    <Edit2Icon size={20} color="#3B82F6" />
+                                    <Edit2Icon size={16} color="#3B82F6" />
                                 </TouchableOpacity>
-                                <DeleteNote 
-                                    userId={user?.$id || ''} 
-                                    documentId={note.$id}
-                                    onDeleteSuccess={handleDeleteSuccess}
-                                />
+                                <View className="ml-1">
+                                    <DeleteNote
+                                        userId={user?.$id || ''}
+                                        documentId={note.$id}
+                                        onDeleteSuccess={handleDeleteSuccess}
+                                    />
+                                </View>
                             </View>
                         </View>
-                        <Text className="text-gray-600">{truncateContent(note.content)}</Text>
+                        <Text className="text-gray-600 mt-1">{truncateContent(note.content)}</Text>
                     </TouchableOpacity>
-                ))}
-
-                {filteredNotes.length === 0 && (
+                )}
+                ListEmptyComponent={() => (
                     <View className="items-center justify-center py-16">
-                        <Text className="text-center text-gray-500 mb-4">
-                            {selectedTag
-                                ? `No notes in "${selectedTag}" category`
-                                : 'No notes yet'
+                        <View className="bg-gray-100 p-4 rounded-full mb-4">
+                            <Search size={24} color="#9CA3AF" />
+                        </View>
+                        <Text className="text-center text-gray-500 mb-2 text-lg font-medium">
+                            {searchQuery
+                                ? "No matching notes found"
+                                : selectedTag
+                                    ? `No notes in "${selectedTag}" category`
+                                    : 'No notes yet'
+                            }
+                        </Text>
+                        <Text className="text-center text-gray-400 mb-6 max-w-xs">
+                            {searchQuery
+                                ? "Try adjusting your search terms"
+                                : "Create your first note to get started"
                             }
                         </Text>
                         <TouchableOpacity
@@ -133,7 +203,9 @@ const FetchNotes = () => {
                         </TouchableOpacity>
                     </View>
                 )}
-            </ScrollView>
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
+            />
         </View>
     )
 }
