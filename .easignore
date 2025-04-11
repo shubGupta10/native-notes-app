@@ -16,3 +16,6 @@ OneDrive
 *.zip
 *.tar.gz
 .history
+
+/android
+/ios
