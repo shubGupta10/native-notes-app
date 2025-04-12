@@ -27,7 +27,7 @@ export const account = new Account(client);
 
 export async function login() {
   try {
-    const redirectUri = Linking.createURL("/");
+    const redirectUri = Linking.createURL("auth-callback");
 
 
     // Step 1: Request OAuth2 URL from Appwrite
