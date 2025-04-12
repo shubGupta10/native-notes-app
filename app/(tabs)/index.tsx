@@ -1,5 +1,5 @@
 import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link, useRouter } from 'expo-router'
 import FetchNotes from '@/components/FetchNotes'
@@ -10,6 +10,12 @@ import { Feather } from '@expo/vector-icons'
 const Index = () => {
   const { user } = useAuthStore()
   const router = useRouter()
+  const [viewMode, setViewMode] = useState<'list' | 'compact'>('list') 
+
+  // Toggle view mode function
+  const toggleViewMode = () => {
+    setViewMode(viewMode === 'list' ? 'compact' : 'list')
+  }
 
   // Logged-in state
   if (user) {
@@ -21,14 +27,28 @@ const Index = () => {
             <Text className="text-2xl font-bold text-gray-800">NoteNest</Text>
             <Text className="text-sm text-gray-500">Your personal note collection</Text>
           </View>
-          <TouchableOpacity
-            onPress={() => router.push('/create')}
-            className="bg-blue-600 p-3 rounded-full shadow-sm"
-          >
-            <Feather name="plus" size={22} color="white" />
-          </TouchableOpacity>
+          <View className="flex-row items-center">
+            {/* View toggle button */}
+            <TouchableOpacity
+              onPress={toggleViewMode}
+              className="bg-gray-100 p-3 rounded-full mr-3"
+            >
+              <Feather 
+                name={viewMode === 'list' ? 'grid' : 'list'} 
+                size={22} 
+                color="#4B5563"
+              />
+            </TouchableOpacity>
+            {/* Create note button */}
+            <TouchableOpacity
+              onPress={() => router.push('/create')}
+              className="bg-blue-600 p-3 rounded-full shadow-sm"
+            >
+              <Feather name="plus" size={22} color="white" />
+            </TouchableOpacity>
+          </View>
         </View>
-        <FetchNotes />
+        <FetchNotes viewMode={viewMode} />
       </SafeAreaView>
     )
   }
@@ -109,7 +129,7 @@ const Index = () => {
           </View>
         </View>
       </ScrollView>
-      </SafeAreaView>
+    </SafeAreaView>
   )
 }
 
