@@ -27,8 +27,8 @@ export const account = new Account(client);
 
 export async function login() {
   try {
-    const redirectUri = Linking.createURL('/');
-    console.log("🔁 Redirect URI:", redirectUri);
+    const redirectUri = Linking.createURL("auth-callback");
+
 
     // Step 1: Request OAuth2 URL from Appwrite
     const response = await account.createOAuth2Token(OAuthProvider.Google, redirectUri);
