@@ -1,4 +1,15 @@
-import { Account, Avatars, Client, OAuthProvider, Databases, ID, Permission, Role, Query } from 'react-native-appwrite'
+import {
+  Account,
+  Avatars,
+  Client,
+  OAuthProvider,
+  Databases,
+  ID,
+  Permission,
+  Role,
+  Query,
+  Models
+} from 'react-native-appwrite'
 import * as Linking from 'expo-linking'
 import { openAuthSessionAsync } from "expo-web-browser";
 
@@ -15,7 +26,7 @@ export const config = {
 }
 
 export const client = new Client();
-const databases = new Databases(client);
+export const databases = new Databases(client);
 
 client
   .setEndpoint(config.endpoint!)
@@ -230,3 +241,221 @@ export async function editNoteByUserIdAndDocumentId(
     console.error("Update Error:", error);
   }
 }
+
+export async function createTracker(
+    id: string,
+    userId: string,
+    name: string,
+    createdAt: string
+): Promise<Models.Document | { error: string }> {
+  try {
+    // Step 1: Check if tracker with the same name already exists for the user
+    const existing = await databases.listDocuments(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_TRACKER_COLLECTION_ID!,
+        [
+          Query.equal('userId', userId),
+          Query.equal('name', name)
+        ]
+    );
+
+    if (existing.total > 0) {
+      return { error: 'Tracker name already exists. Please choose a new name.' };
+    }
+
+    // Step 2: Create new tracker
+    const response = await databases.createDocument(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_TRACKER_COLLECTION_ID!,
+        id,
+        {
+          id,
+          userId,
+          name,
+          createdAt
+        },
+        [
+          Permission.read(Role.user(userId)),
+          Permission.update(Role.user(userId)),
+          Permission.delete(Role.user(userId)),
+        ]
+    );
+
+    return response;
+
+  } catch (error) {
+    console.error('Create Error:', error);
+    throw error;
+  }
+}
+
+export async function deleteTracker(id: string, userId: string)  {
+  try {
+    const existingTracker = await  databases.listDocuments(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_TRACKER_COLLECTION_ID!,
+        [
+            Query.equal('userId', userId),
+            Query.equal('id', id),
+        ]
+    );
+
+    if(existingTracker.total === 0){
+      return { success: false, message: 'Tracker not found or not authorized.' };
+    }
+
+    const documentId = existingTracker.documents[0].$id;
+
+    await databases.deleteDocument(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_TRACKER_COLLECTION_ID!,
+        documentId
+    );
+
+    return { success: true, message: 'Tracker deleted successfully.' };
+  }catch (error){
+    console.error('Delete Error:', error);
+    return { success: false, message: 'Something went wrong while deleting the tracker.' };
+  }
+}
+
+export async function fetchTracker(userId: string) {
+  try {
+    const trackers = await databases.listDocuments(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_TRACKER_COLLECTION_ID!,
+        [
+          Query.equal('userId', userId),
+        ]
+    );
+
+    if (trackers.total === 0) {
+      return { success: false, message: 'No trackers found or not authorized.' };
+    }
+
+    return { success: true, trackers: trackers.documents };
+
+  } catch (error) {
+    console.error('Fetch Error:', error);
+    return { success: false, message: 'An error occurred while fetching trackers.' };
+  }
+}
+
+export async function fetchSingleTracker(id: string, userId: string) {
+  try {
+    const singleTracker = await databases.listDocuments(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_TRACKER_COLLECTION_ID!,
+        [
+            Query.equal('id', id),
+            Query.equal('userId', userId),
+        ]
+    )
+    return {success: true, tracker: singleTracker.documents}
+  }catch (error){
+    console.error('Fetch Error:', error);
+  }
+}
+
+export async function createEntry(userId: string, trackerId: string, date: string, status: boolean) {
+  try {
+    const res = await databases.listDocuments(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_ENTRIES_COLLECTION_ID!,
+        [
+          Query.equal("userId", userId),
+          Query.equal("trackerId", trackerId),
+          Query.equal("date", date),
+        ]
+    )
+
+    if (res.documents.length > 0) {
+      // Entry exists, update it
+      const existing = res.documents[0]
+      const updated = await databases.updateDocument(
+          process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+          process.env.EXPO_PUBLIC_APPWRITE_ENTRIES_COLLECTION_ID!,
+          existing.$id,
+          { status }
+      )
+      return updated
+    } else {
+      // Entry does not exist, create it
+      const created = await databases.createDocument(
+          process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+          process.env.EXPO_PUBLIC_APPWRITE_ENTRIES_COLLECTION_ID!,
+          ID.unique(),
+          {
+            userId,
+            trackerId,
+            date,
+            status
+          },
+          [
+            Permission.read(Role.user(userId)),
+            Permission.update(Role.user(userId)),
+            Permission.delete(Role.user(userId)),
+          ]
+      )
+      return created
+    }
+  } catch (error) {
+    console.error("Upsert Entry Error:", error)
+    return null
+  }
+}
+
+export async function fetchStatus(userId: string, trackerId: string, date: string) {
+  try {
+    const res = await databases.listDocuments(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_ENTRIES_COLLECTION_ID!,
+        [
+          Query.equal("userId", userId),
+          Query.equal("trackerId", trackerId),
+          Query.equal("date", date),
+        ]
+    )
+
+    if (res.documents.length > 0) {
+      const entry = res.documents[0]
+      return {
+        status: entry.status,
+        entryId: entry.$id,
+        date: entry.date,
+      }
+    } else {
+      return {
+        status: false,
+        entryId: null,
+        date: null,
+      }
+    }
+  } catch (error) {
+    console.error("Fetch Status Error:", error)
+    return {
+      status: false,
+      entryId: null,
+      date: null,
+    }
+  }
+}
+
+export async function updateEntry(entryId: string, status: boolean, userId: string) {
+  try {
+    const result = await databases.updateDocument(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_ENTRIES_COLLECTION_ID!,
+        entryId,
+        {
+          status: status,
+        }
+    )
+
+    return result
+  } catch (error) {
+    console.error('Update Entry Error:', error)
+    return null
+  }
+}
+
