@@ -1,4 +1,4 @@
-import { ScrollView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform } from 'react-native'
+import { ScrollView, Text, TextInput, TouchableOpacity, View, KeyboardAvoidingView, Platform, useColorScheme } from 'react-native'
 import React, { useState } from 'react'
 import AuthWrapper from '@/components/AuthWrapper'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -6,6 +6,7 @@ import { saveNote } from '@/lib/appwrite'
 import { useAuthStore } from '@/store/useAuthStore'
 import { StatusBar } from 'expo-status-bar'
 import { Feather } from '@expo/vector-icons'
+import {appColors} from "@/lib/appColors";
 
 const Create = () => {
     const [title, setTitle] = useState('')
@@ -13,6 +14,8 @@ const Create = () => {
     const [content, setContent] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const { user } = useAuthStore()
+    const colorScheme = useColorScheme() as 'light' | 'dark'
+    const colors = appColors[colorScheme || 'light']
 
     const handleSubmit = async () => {
         if (!title || !content) {
@@ -40,78 +43,132 @@ const Create = () => {
 
     return (
         <AuthWrapper redirectToLogin={true}>
-            <SafeAreaView className="flex-1 bg-gray-50">
-                <StatusBar style="dark" />
-                <KeyboardAvoidingView 
+            <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+                <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+                <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                    className="flex-1"
+                    style={{ flex: 1 }}
                 >
-                    <View className="flex-1 px-4">
-                        <View className="flex-row items-center justify-between py-4">
-                            <Text className="text-2xl font-bold text-gray-800">Create Note</Text>
-                            <TouchableOpacity 
-                                className="p-2 rounded-full bg-gray-100"
+                    <View style={{ flex: 1, paddingHorizontal: 16 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 16 }}>
+                            <Text style={{ fontSize: 24, fontWeight: 'bold', color: colors.text.primary }}>Create Note</Text>
+                            <TouchableOpacity
+                                style={{ padding: 8, borderRadius: 9999, backgroundColor: colors.card }}
                                 onPress={() => {/* Add navigation or dismiss action */}}
                             >
-                                <Feather name="x" size={20} color="#4B5563" />
+                                <Feather name="x" size={20} color={colors.text.secondary} />
                             </TouchableOpacity>
                         </View>
-                        
+
                         <ScrollView
-                            className="flex-1"
+                            style={{ flex: 1 }}
                             showsVerticalScrollIndicator={false}
                             contentContainerStyle={{ paddingBottom: 40 }}
                         >
-                            <View className="space-y-5 bg-white p-4 rounded-xl shadow-sm mb-4">
-                                <View className="space-y-2">
-                                    <Text className="text-base font-medium text-gray-700">Title</Text>
+                            <View style={{
+                                marginBottom: 16,
+                                padding: 16,
+                                backgroundColor: colors.card,
+                                borderRadius: 12,
+                                shadowColor: colors.shadow.color,
+                                shadowOpacity: colors.shadow.opacity,
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowRadius: 4,
+                                elevation: 2
+                            }}>
+                                <View style={{ marginBottom: 20 }}>
+                                    <Text style={{ fontSize: 16, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>Title</Text>
                                     <TextInput
-                                        className="border border-gray-300 bg-white rounded-xl px-4 py-3 text-gray-800 shadow-sm"
+                                        style={{
+                                            borderWidth: 1,
+                                            borderColor: colors.border,
+                                            backgroundColor: colors.background,
+                                            borderRadius: 12,
+                                            paddingHorizontal: 16,
+                                            paddingVertical: 12,
+                                            color: colors.text.primary
+                                        }}
                                         placeholder="Enter note title"
                                         value={title}
                                         onChangeText={setTitle}
-                                        placeholderTextColor="#9ca3af"
+                                        placeholderTextColor={colors.text.tertiary}
                                     />
                                 </View>
 
-                                <View className="space-y-2">
-                                    <Text className="text-base font-medium text-gray-700">Category</Text>
+                                <View>
+                                    <Text style={{ fontSize: 16, fontWeight: '500', color: colors.text.secondary, marginBottom: 8 }}>Category</Text>
                                     <TextInput
-                                        className="border border-gray-300 bg-white rounded-xl px-4 py-3 text-gray-800 shadow-sm"
+                                        style={{
+                                            borderWidth: 1,
+                                            borderColor: colors.border,
+                                            backgroundColor: colors.background,
+                                            borderRadius: 12,
+                                            paddingHorizontal: 16,
+                                            paddingVertical: 12,
+                                            color: colors.text.primary
+                                        }}
                                         placeholder="E.g. Hooks, Navigation"
                                         value={category}
                                         onChangeText={setCategory}
-                                        placeholderTextColor="#9ca3af"
+                                        placeholderTextColor={colors.text.tertiary}
                                     />
                                 </View>
                             </View>
 
-                            <View className="space-y-4 bg-white p-4 rounded-xl shadow-sm mb-4">
-                                <Text className="text-base font-medium text-gray-700">Content</Text>
-                                
+                            <View style={{
+                                marginBottom: 16,
+                                padding: 16,
+                                backgroundColor: colors.card,
+                                borderRadius: 12,
+                                shadowColor: colors.shadow.color,
+                                shadowOpacity: colors.shadow.opacity,
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowRadius: 4,
+                                elevation: 2
+                            }}>
+                                <Text style={{ fontSize: 16, fontWeight: '500', color: colors.text.secondary, marginBottom: 16 }}>Content</Text>
+
                                 <TextInput
-                                    className="border border-gray-300 bg-white rounded-xl px-4 py-3 text-gray-800"
+                                    style={{
+                                        borderWidth: 1,
+                                        borderColor: colors.border,
+                                        backgroundColor: colors.background,
+                                        borderRadius: 12,
+                                        paddingHorizontal: 16,
+                                        paddingVertical: 12,
+                                        color: colors.text.primary,
+                                        minHeight: 200
+                                    }}
                                     placeholder="Write your note here..."
                                     value={content}
                                     onChangeText={setContent}
-                                    placeholderTextColor="#9ca3af"
+                                    placeholderTextColor={colors.text.tertiary}
                                     multiline
                                     textAlignVertical="top"
-                                    style={{ minHeight: 200 }}
                                 />
                             </View>
 
-                            <View className="mt-4 mb-6">
+                            <View style={{ marginTop: 16, marginBottom: 24 }}>
                                 <TouchableOpacity
-                                    className={`py-4 rounded-xl flex-row justify-center items-center space-x-2 ${
-                                        isSubmitting ? 'bg-blue-400' : 'bg-blue-600'
-                                    } shadow-sm`}
+                                    style={{
+                                        paddingVertical: 16,
+                                        borderRadius: 12,
+                                        flexDirection: 'row',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        backgroundColor: isSubmitting ? colors.accent.secondary : colors.accent.primary,
+                                        shadowColor: colors.shadow.color,
+                                        shadowOpacity: colors.shadow.opacity,
+                                        shadowOffset: { width: 0, height: 2 },
+                                        shadowRadius: 4,
+                                        elevation: 2
+                                    }}
                                     onPress={handleSubmit}
                                     disabled={isSubmitting}
                                     activeOpacity={0.8}
                                 >
-                                    <Feather name="save" size={20} color="white" />
-                                    <Text className="text-white text-center font-bold text-lg">
+                                    <Feather name="save" size={20} color={colors.background} style={{ marginRight: 8 }} />
+                                    <Text style={{ color: colors.background, textAlign: 'center', fontWeight: 'bold', fontSize: 18 }}>
                                         {isSubmitting ? 'Saving...' : 'Save Note'}
                                     </Text>
                                 </TouchableOpacity>

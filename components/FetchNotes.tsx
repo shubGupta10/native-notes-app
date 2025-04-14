@@ -1,4 +1,4 @@
-import { ScrollView, Text, View, TouchableOpacity, ActivityIndicator, FlatList } from 'react-native'
+import { ScrollView, Text, View, TouchableOpacity, ActivityIndicator, FlatList, useColorScheme } from 'react-native'
 import React, { useEffect, useState, useCallback } from 'react'
 import { useAuthStore } from '@/store/useAuthStore'
 import { fetchNotesByUserId } from '@/lib/appwrite'
@@ -27,6 +27,25 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
     const [selectedTag, setSelectedTag] = useState<string | null>(null)
     const [searchQuery, setSearchQuery] = useState('')
     const [categories, setCategories] = useState<string[]>([])
+    const colorScheme = useColorScheme()
+    const isDarkMode = colorScheme === 'dark'
+
+    // Enhanced color palette for better visibility
+    const colors = {
+        background: isDarkMode ? "#121212" : "#FFFFFF",
+        cardBackground: isDarkMode ? "#1E1E1E" : "#FFFFFF",
+        cardBorder: isDarkMode ? "#333333" : "#E5E7EB",
+        text: {
+            primary: isDarkMode ? "#F3F4F6" : "#1F2937",
+            secondary: isDarkMode ? "#D1D5DB" : "#4B5563",
+            tertiary: isDarkMode ? "#9CA3AF" : "#6B7280",
+        },
+        accent: {
+            primary: isDarkMode ? "#60A5FA" : "#3B82F6",
+            secondary: isDarkMode ? "#3B82F6" : "#2563EB",
+            light: isDarkMode ? "rgba(96, 165, 250, 0.2)" : "rgba(59, 130, 246, 0.1)",
+        }
+    }
 
     const handleFetchNotes = useCallback(async () => {
         if (user?.$id) {
@@ -97,32 +116,45 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
 
     if (loading && !refreshing) {
         return (
-            <View className="flex-1 justify-center items-center bg-white">
-                <ActivityIndicator size="large" color="#4285F4" />
-                <Text className="mt-4 text-gray-500">Loading notes...</Text>
+            <View className="flex-1 justify-center items-center" style={{ backgroundColor: colors.background }}>
+                <ActivityIndicator size="large" color={colors.accent.primary} />
+                <Text className="mt-4" style={{ color: colors.text.tertiary }}>Loading notes...</Text>
             </View>
         )
     }
 
     // Render a note item - used in both list and compact views
     const renderNoteItem = ({ item: note }: { item: Note }) => (
-        <View className={`border rounded-lg border-gray-200 bg-white shadow-sm overflow-hidden
-                       ${viewMode === 'compact' ? 'w-60 mr-3' : 'mb-3'}`}>
-            <TouchableOpacity 
-                onPress={() => handleViewNote(note.$id)} 
+        <View
+            className={`rounded-lg overflow-hidden shadow-sm ${viewMode === 'compact' ? 'w-60 mr-3' : 'mb-4'}`}
+            style={{
+                backgroundColor: colors.cardBackground,
+                borderWidth: 1,
+                borderColor: colors.cardBorder,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: isDarkMode ? 0.3 : 0.1,
+                shadowRadius: 3,
+                elevation: 2,
+            }}
+        >
+            <TouchableOpacity
+                onPress={() => handleViewNote(note.$id)}
                 activeOpacity={0.7}
                 className="p-4"
             >
-                <Text 
-                    className="text-lg font-semibold text-gray-800 flex-1 mb-1"
+                <Text
+                    className="text-lg font-semibold mb-1"
                     numberOfLines={viewMode === 'compact' ? 1 : 2}
+                    style={{ color: colors.text.primary }}
                 >
                     {note.title}
                 </Text>
 
-                <Text 
-                    className="text-gray-600 mt-2"
+                <Text
+                    className="mt-2"
                     numberOfLines={viewMode === 'compact' ? 2 : 3}
+                    style={{ color: colors.text.secondary }}
                 >
                     {truncateContent(note.content, viewMode === 'compact' ? 60 : 80)}
                 </Text>
@@ -131,10 +163,15 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
             <View className={`flex-row justify-between items-start px-4 pb-3 ${viewMode === 'compact' ? 'pt-0' : 'pt-0'}`}>
                 <TouchableOpacity
                     onPress={() => setSelectedTag(note.category)}
-                    className="flex-row items-center bg-blue-50 px-3 py-1 rounded-full mr-2"
+                    className="flex-row items-center px-3 py-1 rounded-full mr-2"
+                    style={{ backgroundColor: colors.accent.light }}
                 >
-                    <Feather name="tag" size={12} color="#4285F4" />
-                    <Text className="text-xs text-blue-600 font-medium ml-1" numberOfLines={1}>
+                    <Feather name="tag" size={12} color={colors.accent.primary} />
+                    <Text
+                        className="text-xs font-medium ml-1"
+                        numberOfLines={1}
+                        style={{ color: colors.accent.primary }}
+                    >
                         {note.category}
                     </Text>
                 </TouchableOpacity>
@@ -142,10 +179,11 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
                 <View className="flex-row items-center space-x-1">
                     <TouchableOpacity
                         onPress={() => handleEdit(note.$id)}
-                        className="p-2 rounded-full bg-gray-100"
+                        className="p-2 rounded-full"
+                        style={{ backgroundColor: isDarkMode ? '#2A2A2A' : '#F3F4F6' }}
                         activeOpacity={0.7}
                     >
-                        <Feather name="edit-2" size={14} color="#3B82F6" />
+                        <Feather name="edit-2" size={14} color={colors.accent.primary} />
                     </TouchableOpacity>
 
                     <DeleteNote
@@ -160,10 +198,13 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
 
     const EmptyListComponent = () => (
         <View className="items-center justify-center py-16">
-            <View className="bg-gray-100 p-4 rounded-full mb-4">
-                <Feather name="search" size={24} color="#9CA3AF" />
+            <View className="p-4 rounded-full mb-4" style={{ backgroundColor: isDarkMode ? '#2A2A2A' : '#F3F4F6' }}>
+                <Feather name="search" size={24} color={colors.text.tertiary} />
             </View>
-            <Text className="text-center text-gray-500 mb-2 text-lg font-medium">
+            <Text
+                className="text-center mb-2 text-lg font-medium"
+                style={{ color: colors.text.secondary }}
+            >
                 {searchQuery
                     ? "No matching notes found"
                     : selectedTag
@@ -171,7 +212,10 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
                         : 'No notes yet'
                 }
             </Text>
-            <Text className="text-center text-gray-400 mb-6 max-w-xs">
+            <Text
+                className="text-center mb-6 max-w-xs"
+                style={{ color: colors.text.tertiary }}
+            >
                 {searchQuery
                     ? "Try adjusting your search terms"
                     : "Create your first note to get started"
@@ -179,7 +223,8 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
             </Text>
             <TouchableOpacity
                 onPress={() => router.push('/create')}
-                className="bg-blue-500 px-6 py-3 rounded-lg"
+                className="px-6 py-3 rounded-lg"
+                style={{ backgroundColor: colors.accent.secondary }}
             >
                 <Text className="text-white font-medium">Create Note</Text>
             </TouchableOpacity>
@@ -190,7 +235,7 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
     const categorySections = [...new Set([...filteredNotes.map(note => note.category), 'Uncategorized'])].filter(Boolean);
 
     return (
-        <View className="flex-1 bg-white px-4 pt-4">
+        <View className="flex-1 px-4 pt-4" style={{ backgroundColor: colors.background }}>
             {/* Header */}
             <View className="mb-4">
                 <SearchInNotes searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
@@ -198,7 +243,10 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
 
             <View className="flex-row justify-between items-center mb-4">
                 <View className="flex-row items-center">
-                    <Text className="text-2xl font-bold text-gray-800">
+                    <Text
+                        className="text-2xl font-bold"
+                        style={{ color: colors.text.primary }}
+                    >
                         {selectedTag ? `${selectedTag}` : 'All Notes'}
                     </Text>
                     {selectedTag && (
@@ -206,19 +254,30 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
                             onPress={() => setSelectedTag(null)}
                             className="ml-2"
                         >
-                            <Ionicons name="close" size={16} color="#6B7280" />
+                            <Ionicons name="close-circle" size={18} color={colors.text.tertiary} />
                         </TouchableOpacity>
                     )}
                 </View>
 
                 <View className="flex-row items-center">
-                    <Text className="text-gray-500 mr-3">{filteredNotes.length} notes</Text>
+                    <Text
+                        className="mr-3"
+                        style={{ color: colors.text.tertiary }}
+                    >
+                        {filteredNotes.length} notes
+                    </Text>
                     <TouchableOpacity
                         onPress={handleRefresh}
                         disabled={refreshing}
-                        className={`${refreshing ? 'opacity-50' : ''} p-2 bg-gray-100 rounded-full`}
+                        className={`${refreshing ? 'opacity-50' : ''} p-2 rounded-full`}
+                        style={{ backgroundColor: isDarkMode ? '#2A2A2A' : '#F3F4F6' }}
                     >
-                        <Feather name="refresh-cw" size={18} color="#4285F4" />
+                        <Feather
+                            name="refresh-cw"
+                            size={18}
+                            color={colors.accent.primary}
+                            style={refreshing ? { transform: [{ rotate: '45deg' }] } : {}}
+                        />
                     </TouchableOpacity>
                 </View>
             </View>
@@ -227,7 +286,7 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
             {refreshing && (
                 <ActivityIndicator
                     size="small"
-                    color="#4285F4"
+                    color={colors.accent.primary}
                     style={{ marginVertical: 10 }}
                 />
             )}
@@ -241,29 +300,32 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
                     keyExtractor={item => item.$id}
                     renderItem={renderNoteItem}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 20 }}
+                    contentContainerStyle={{ paddingBottom: 100 }}
                 />
             ) : (
                 // Compact view with horizontal scrolling sections
                 <FlatList
                     data={
-                        selectedTag 
-                            ? [selectedTag] 
+                        selectedTag
+                            ? [selectedTag]
                             : categorySections
                     }
                     keyExtractor={(item) => `section-${item}`}
                     renderItem={({ item: category }) => {
-                        const categoryNotes = filteredNotes.filter(note => 
-                            category === 'Uncategorized' 
-                                ? !note.category 
+                        const categoryNotes = filteredNotes.filter(note =>
+                            category === 'Uncategorized'
+                                ? !note.category
                                 : note.category === category
                         );
-                        
+
                         if (categoryNotes.length === 0) return null;
-                        
+
                         return (
                             <View className="mb-6">
-                                <Text className="text-base font-semibold text-gray-700 mb-3">
+                                <Text
+                                    className="text-base font-semibold mb-3"
+                                    style={{ color: colors.text.secondary }}
+                                >
                                     {category}
                                 </Text>
                                 <FlatList
@@ -278,7 +340,7 @@ const FetchNotes = ({ viewMode = 'list' }: FetchNotesProps) => {
                         );
                     }}
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{ paddingBottom: 20 }}
+                    contentContainerStyle={{ paddingBottom: 100 }}
                 />
             )}
         </View>

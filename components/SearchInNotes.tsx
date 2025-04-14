@@ -8,7 +8,7 @@ type SearchProps = {
 const SearchInNotes = ({searchQuery, setSearchQuery}: SearchProps) => {
     return (
         <View className='mb-6'>
-            <Text className='py-2 text-2xl font-bold px-2' >Search Note</Text>
+            <Text className='py-2 text-2xl dark:text-white font-bold px-2' >Search Note</Text>
             <TextInput
                 value={searchQuery}
                 onChangeText={setSearchQuery}
