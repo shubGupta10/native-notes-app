@@ -326,12 +326,9 @@ export async function fetchTracker(userId: string) {
         process.env.EXPO_PUBLIC_APPWRITE_TRACKER_COLLECTION_ID!,
         [
           Query.equal('userId', userId),
-        ]
-    );
+        ],
 
-    if (trackers.total === 0) {
-      return { success: false, message: 'No trackers found or not authorized.' };
-    }
+    );
 
     return { success: true, trackers: trackers.documents };
 

@@ -11,30 +11,9 @@ import { Query } from "react-native-appwrite"
 import { useColorScheme } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { format } from 'date-fns'
+import {MarkedDates, TrackerData, EntryStatus} from "@/types/trackerTypes";
 
-type MarkedDates = {
-    [date: string]: {
-        selected?: boolean;
-        marked?: boolean;
-        dotColor?: string;
-        selectedColor?: string;
-        selectedTextColor?: string;
-    };
-}
 
-type EntryStatus = {
-    status: boolean;
-    entryId: string | null;
-    date: string | null;
-}
-
-type TrackerData = {
-    name: string;
-    description?: string;
-    createdAt: string;
-    id: string;
-    userId: string;
-}
 
 const DisplayTracker = () => {
     const { id } = useLocalSearchParams()
