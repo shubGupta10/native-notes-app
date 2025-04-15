@@ -21,9 +21,9 @@ export async function scheduleDailyNotification() {
         // Schedule the notification using proper type casting
         if (Platform.OS === 'ios') {
             await Notifications.scheduleNotificationAsync({
-                content: {
-                    title: "🧠 Habit Reminder",
-                    body: "Did you complete your habits today?",
+                content : {
+                    title: "🔔 Task Reminder",
+                    body: "Have you completed your tasks today?",
                     sound: true,
                 },
                 trigger: {
@@ -35,9 +35,9 @@ export async function scheduleDailyNotification() {
         } else {
             // For Android use seconds (86400 seconds = 24 hours)
             await Notifications.scheduleNotificationAsync({
-                content: {
-                    title: "🧠 Habit Reminder",
-                    body: "Did you complete your habits today?",
+                content : {
+                    title: "🔔 Task Reminder",
+                    body: "Have you completed your tasks today?",
                     sound: true,
                 },
                 trigger: {
