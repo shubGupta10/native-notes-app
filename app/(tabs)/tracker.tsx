@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { View, Text, TouchableOpacity, ActivityIndicator, FlatList } from "react-native"
+import { View, Text, TouchableOpacity, ActivityIndicator, FlatList, Modal, TextInput, Alert } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { useRouter } from "expo-router"
 import { useAuthStore } from "@/store/useAuthStore"
-import { fetchTracker } from "@/lib/appwrite"
+import { fetchTracker, deleteTracker, editTracker } from "@/lib/appwrite"
 import { appColors } from "@/lib/appColors"
 import { useColorScheme } from "react-native"
 import { Feather } from "@expo/vector-icons"
@@ -27,6 +27,12 @@ const Tracker = () => {
     const [error, setError] = useState<boolean>(false)
     const colorScheme = useColorScheme()
     const colors = colorScheme === "dark" ? appColors.dark : appColors.light
+
+    // Edit modal states
+    const [editModalVisible, setEditModalVisible] = useState(false)
+    const [currentTracker, setCurrentTracker] = useState<TrackerDocument | null>(null)
+    const [newTrackerName, setNewTrackerName] = useState("")
+    const [isEditing, setIsEditing] = useState(false)
 
     const handleNavigate = () => {
         router.push("/create-tracker")
@@ -70,20 +76,112 @@ const Tracker = () => {
         }
     }, [user])
 
+    const handleEdit = (tracker: TrackerDocument) => {
+        setCurrentTracker(tracker)
+        setNewTrackerName(tracker.name)
+        setEditModalVisible(true)
+    }
+
+    const handleConfirmEdit = async () => {
+        if (!currentTracker || !user?.$id || !newTrackerName.trim()) return
+
+        setIsEditing(true)
+        try {
+            const result = await editTracker(currentTracker.id, user.$id, newTrackerName.trim())
+
+            if (result.success) {
+                // Update the tracker in the local state
+                setTrackers(prevTrackers =>
+                    prevTrackers.map(tracker =>
+                        tracker.id === currentTracker.id
+                            ? { ...tracker, name: newTrackerName.trim() }
+                            : tracker
+                    )
+                )
+                setEditModalVisible(false)
+                // Show success message
+                Alert.alert("Success", "Tracker updated successfully")
+            } else {
+                Alert.alert("Error", result.message || "Failed to update tracker")
+            }
+        } catch (error) {
+            console.error("Error updating tracker:", error)
+            Alert.alert("Error", "Something went wrong while updating the tracker")
+        } finally {
+            setIsEditing(false)
+        }
+    }
+
+    const handleDelete = async (tracker: TrackerDocument) => {
+        if (!user?.$id) return
+
+        // Confirm deletion
+        Alert.alert(
+            "Delete Tracker",
+            `Are you sure you want to delete "${tracker.name}"?`,
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        setLoading(true)
+                        try {
+                            const result = await deleteTracker(tracker.id, user.$id)
+
+                            if (result.success) {
+                                // Remove the tracker from the local state
+                                setTrackers(prevTrackers =>
+                                    prevTrackers.filter(t => t.id !== tracker.id)
+                                )
+                                Alert.alert("Success", "Tracker deleted successfully")
+                            } else {
+                                Alert.alert("Error", result.message || "Failed to delete tracker")
+                            }
+                        } catch (error) {
+                            console.error("Error deleting tracker:", error)
+                            Alert.alert("Error", "Something went wrong while deleting the tracker")
+                        } finally {
+                            setLoading(false)
+                        }
+                    }
+                }
+            ]
+        )
+    }
+
     const renderTrackerItem = ({ item }: { item: TrackerDocument }) => (
         <TouchableOpacity
             onPress={() => handleNavigateToTracker(item.$id || item.id)}
             className="p-4 mb-3 rounded-xl"
-            style={{ backgroundColor: colors.card, borderColor: colors.border, borderWidth: 1 }}
+            style={{
+                backgroundColor: colors.card,
+                borderColor: colors.border,
+                borderWidth: 1,
+            }}
         >
-            <Text className="text-lg font-semibold" style={{ color: colors.text.primary }}>
-                {item.name}
-            </Text>
-            <Text className="text-sm mt-1" style={{ color: colors.text.secondary }}>
+            <View className="flex-row justify-between items-center mb-2">
+                <Text className="text-lg font-semibold" style={{ color: colors.text.primary }}>
+                    {item.name}
+                </Text>
+                <View className="flex-row space-x-5 gap-5">
+                    <TouchableOpacity onPress={() => handleEdit(item)}>
+                        <Feather name="edit" size={22} color={colors.accent.primary} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleDelete(item)}>
+                        <Feather name="trash" size={22} color={colors.status.error} />
+                    </TouchableOpacity>
+                </View>
+            </View>
+
+            <Text className="text-sm" style={{ color: colors.text.secondary }}>
                 Created: {new Date(item.createdAt).toLocaleDateString()}
             </Text>
         </TouchableOpacity>
-    )
+    );
 
     const renderContent = () => {
         if (loading) {
@@ -173,6 +271,64 @@ const Tracker = () => {
 
                     {renderContent()}
                 </View>
+
+                {/* Edit Modal */}
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={editModalVisible}
+                    onRequestClose={() => setEditModalVisible(false)}>
+                    <View className="flex-1 justify-center items-center bg-black/50">
+                        <View
+                            className="w-4/5 p-6 rounded-xl"
+                            style={{ backgroundColor: colors.card }}
+                        >
+                            <Text
+                                className="text-xl font-bold mb-4"
+                                style={{ color: colors.text.primary }}
+                            >
+                                Edit Tracker
+                            </Text>
+
+                            <TextInput
+                                className="border rounded-lg px-4 py-3 mb-4"
+                                style={{
+                                    borderColor: colors.border,
+                                    color: colors.text.primary,
+                                    backgroundColor: colors.background
+                                }}
+                                value={newTrackerName}
+                                onChangeText={setNewTrackerName}
+                                placeholder="Tracker name"
+                                placeholderTextColor={colors.text.tertiary}
+                            />
+
+                            <View className="flex-row justify-end space-x-3">
+                                <TouchableOpacity
+                                    className="py-2 px-4 rounded-lg border"
+                                    style={{ borderColor: colors.border }}
+                                    onPress={() => setEditModalVisible(false)}
+                                    disabled={isEditing}
+                                >
+                                    <Text style={{ color: colors.text.secondary }}>Cancel</Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity
+                                    className="py-2 px-4 rounded-lg"
+                                    style={{ backgroundColor: colors.accent.primary }}
+                                    onPress={handleConfirmEdit}
+                                    disabled={isEditing || !newTrackerName.trim()}
+                                >
+                                    {isEditing ? (
+                                        <ActivityIndicator size="small" color="#fff" />
+                                    ) : (
+                                        <Text className="text-white">Save</Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
             </SafeAreaView>
         </AuthWrapper>
     )

@@ -319,6 +319,34 @@ export async function deleteTracker(id: string, userId: string)  {
   }
 }
 
+export async function editTracker(id: string, userId: string, name: string){
+  try {
+     const trackerFound = await databases.listDocuments(
+         process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+         process.env.EXPO_PUBLIC_APPWRITE_TRACKER_COLLECTION_ID!,
+         [
+             Query.equal('id', id),
+             Query.equal('userId', userId)
+         ]
+     )
+    if(!trackerFound){
+      return { success: false, message: 'Tracker not found or not authorized.' };
+    }
+
+    const docId = trackerFound.documents[0].$id;
+    const updatedTracker = await databases.updateDocument(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_TRACKER_COLLECTION_ID!,
+        docId,
+        {name}
+    );
+    return { success: true, message: "Tracker updated successfully.", data: updatedTracker };
+  } catch (error: any) {
+    console.error("Error editing tracker:", error);
+    return { success: false, message: error?.message || "Something went wrong." };
+  }
+}
+
 export async function fetchTracker(userId: string) {
   try {
     const trackers = await databases.listDocuments(
