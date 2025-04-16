@@ -11,9 +11,7 @@ import { Query } from "react-native-appwrite"
 import { useColorScheme } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { format } from 'date-fns'
-import {MarkedDates, TrackerData, EntryStatus} from "@/types/trackerTypes";
-
-
+import { MarkedDates, TrackerData, EntryStatus } from "@/types/trackerTypes"
 
 const DisplayTracker = () => {
     const { id } = useLocalSearchParams()
@@ -21,6 +19,7 @@ const DisplayTracker = () => {
     const userId = user?.$id || ''
     const colorScheme = useColorScheme()
     const isDark = colorScheme === 'dark'
+    const colors = isDark ? appColors.dark : appColors.light
 
     const [markedDates, setMarkedDates] = useState<MarkedDates>({})
     const [modalVisible, setModalVisible] = useState(false)
@@ -31,9 +30,8 @@ const DisplayTracker = () => {
     const [totalCompleted, setTotalCompleted] = useState(0)
     const [totalMissed, setTotalMissed] = useState(0)
 
-    const colors = isDark ? appColors.dark : appColors.light
-    const successColor = isDark ? colors.status.success : '#10B981'
-    const errorColor = isDark ? colors.status.error : '#EF4444'
+    const successColor = colors.status.success
+    const errorColor = colors.status.error
     const textColor = '#FFFFFF'
 
     const fetchTrackerData = async () => {
@@ -63,8 +61,7 @@ const DisplayTracker = () => {
             let completed = 0
             let missed = 0
 
-            // @ts-ignore
-            entries.documents.forEach((entry: { date: string, status: boolean }) => {
+            entries.documents.forEach((entry: any) => {
                 newMarkedDates[entry.date] = {
                     selected: true,
                     selectedColor: entry.status ? successColor : errorColor,
@@ -81,9 +78,9 @@ const DisplayTracker = () => {
             setTotalCompleted(completed)
             setTotalMissed(missed)
             setMarkedDates(newMarkedDates)
-            setIsLoading(false)
         } catch (error) {
             console.error("Fetch All Entries Error:", error)
+        } finally {
             setIsLoading(false)
         }
     }
@@ -116,19 +113,15 @@ const DisplayTracker = () => {
                 }
             }))
 
-            setModalVisible(false)
-            setIsLoading(false)
-
-            // Update completed/missed counts
-            if (currentStatus?.status !== status) {
-                if (status) {
+            if (currentStatus?.status !== undefined) {
+                if (status && !currentStatus.status) {
                     setTotalCompleted(prev => prev + 1)
-                    if (currentStatus?.entryId) setTotalMissed(prev => prev - 1)
-                } else {
+                    setTotalMissed(prev => prev - 1)
+                } else if (!status && currentStatus.status) {
                     setTotalMissed(prev => prev + 1)
-                    if (currentStatus?.entryId) setTotalCompleted(prev => prev - 1)
+                    setTotalCompleted(prev => prev - 1)
                 }
-            } else if (!currentStatus?.entryId) {
+            } else {
                 if (status) {
                     setTotalCompleted(prev => prev + 1)
                 } else {
@@ -136,8 +129,10 @@ const DisplayTracker = () => {
                 }
             }
 
+            setModalVisible(false)
         } catch (error) {
             console.error("Status Update Error:", error)
+        } finally {
             setIsLoading(false)
         }
     }
@@ -147,7 +142,7 @@ const DisplayTracker = () => {
             fetchTrackerData()
             fetchAllEntries()
         }
-    }, [id, userId, colorScheme])
+    }, [id, userId])
 
     const formattedDate = trackerData?.createdAt
         ? format(new Date(trackerData.createdAt), 'MMMM dd, yyyy')
@@ -155,8 +150,7 @@ const DisplayTracker = () => {
 
     return (
         <SafeAreaView className={`flex-1 ${isDark ? 'bg-[#121212]' : 'bg-white'}`}>
-            <ScrollView>
-                {/* Header with back button */}
+            <ScrollView showsVerticalScrollIndicator={false}>
                 <View className="px-4 pt-2 flex-row items-center">
                     <TouchableOpacity
                         onPress={() => router.back()}
@@ -165,7 +159,7 @@ const DisplayTracker = () => {
                         <Ionicons
                             name="arrow-back"
                             size={24}
-                            color={isDark ? colors.text.primary : colors.text.primary}
+                            color={colors.text.primary}
                         />
                     </TouchableOpacity>
 
@@ -174,8 +168,7 @@ const DisplayTracker = () => {
                     </Text>
                 </View>
 
-                {/* Tracker Info Card */}
-                <View className={`mx-4 mt-4 p-4 rounded-xl ${isDark ? 'bg-[#1E1E1E]' : 'bg-gray-50'} shadow`}>
+                <View className={`mx-4 mt-4 p-5 rounded-xl ${isDark ? 'bg-[#1E1E1E]' : 'bg-gray-50'} shadow`}>
                     {isLoading && !trackerData ? (
                         <ActivityIndicator color={colors.accent.primary} />
                     ) : (
@@ -185,16 +178,16 @@ const DisplayTracker = () => {
                             </Text>
 
                             {trackerData?.description && (
-                                <Text className={`mt-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                                <Text className={`mt-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                                     {trackerData.description}
                                 </Text>
                             )}
 
-                            <View className="flex-row items-center mt-3">
+                            <View className="flex-row items-center mt-4">
                                 <Ionicons
                                     name="person-outline"
                                     size={16}
-                                    color={isDark ? colors.text.secondary : colors.text.secondary}
+                                    color={colors.text.secondary}
                                 />
                                 <Text className={`ml-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                                     {user?.name || 'User'}
@@ -205,7 +198,7 @@ const DisplayTracker = () => {
                                         <Ionicons
                                             name="calendar-outline"
                                             size={16}
-                                            color={isDark ? colors.text.secondary : colors.text.secondary}
+                                            color={colors.text.secondary}
                                             style={{ marginLeft: 12 }}
                                         />
                                         <Text className={`ml-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -218,7 +211,6 @@ const DisplayTracker = () => {
                     )}
                 </View>
 
-                {/* Stats Card */}
                 <View className="flex-row mx-4 mt-4 mb-4">
                     <View className={`flex-1 p-4 rounded-xl mr-2 ${isDark ? 'bg-[#1E1E1E]' : 'bg-gray-50'} shadow`}>
                         <Text className={`text-lg font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>
@@ -239,8 +231,7 @@ const DisplayTracker = () => {
                     </View>
                 </View>
 
-                {/* Calendar Card */}
-                <View className={`mx-4 mb-6 p-4 rounded-xl ${isDark ? 'bg-[#1E1E1E]' : 'bg-gray-50'} shadow`}>
+                <View className={`mx-4 mb-6 p-5 rounded-xl ${isDark ? 'bg-[#1E1E1E]' : 'bg-gray-50'} shadow`}>
                     <Text className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
                         Tracking Calendar
                     </Text>
@@ -249,78 +240,77 @@ const DisplayTracker = () => {
                         onDayPress={handleDayPress}
                         markedDates={markedDates}
                         theme={{
-                            calendarBackground: isDark ? '#1E1E1E' : '#F9FAFB',
-                            textSectionTitleColor: isDark ? colors.text.primary : colors.text.primary,
-                            textSectionTitleDisabledColor: isDark ? colors.text.tertiary : colors.text.tertiary,
-                            selectedDayBackgroundColor: isDark ? colors.accent.primary : colors.accent.primary,
+                            calendarBackground: isDark ? colors.card : colors.card,
+                            textSectionTitleColor: colors.text.primary,
+                            textSectionTitleDisabledColor: colors.text.tertiary,
+                            selectedDayBackgroundColor: colors.accent.primary,
                             selectedDayTextColor: textColor,
-                            todayTextColor: isDark ? colors.accent.primary : colors.accent.primary,
-                            dayTextColor: isDark ? colors.text.primary : colors.text.primary,
-                            textDisabledColor: isDark ? colors.text.tertiary : colors.text.tertiary,
-                            dotColor: isDark ? colors.accent.primary : colors.accent.primary,
+                            todayTextColor: colors.accent.primary,
+                            dayTextColor: colors.text.primary,
+                            textDisabledColor: colors.text.tertiary,
+                            dotColor: colors.accent.primary,
                             selectedDotColor: textColor,
-                            arrowColor: isDark ? colors.accent.primary : colors.accent.primary,
-                            disabledArrowColor: isDark ? colors.text.tertiary : colors.text.tertiary,
-                            monthTextColor: isDark ? colors.text.primary : colors.text.primary,
-                            indicatorColor: isDark ? colors.accent.primary : colors.accent.primary,
+                            arrowColor: colors.accent.primary,
+                            disabledArrowColor: colors.text.tertiary,
+                            monthTextColor: colors.text.primary,
+                            indicatorColor: colors.accent.primary,
                         }}
                     />
 
-                    <View className="flex-row mt-4 justify-center">
-                        <View className="flex-row items-center mr-4">
-                            <View className="w-4 h-4 rounded-full bg-green-500 mr-2" />
-                            <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <View className="flex-row mt-5 justify-center">
+                        <View className="flex-row items-center mr-6">
+                            <View className="w-4 h-4 rounded-full" style={{ backgroundColor: successColor }} />
+                            <Text className={`ml-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                                 Completed
                             </Text>
                         </View>
 
-                        <View className="flex-row items-center ml-4">
-                            <View className="w-4 h-4 rounded-full bg-red-500 mr-2" />
-                            <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                        <View className="flex-row items-center">
+                            <View className="w-4 h-4 rounded-full" style={{ backgroundColor: errorColor }} />
+                            <Text className={`ml-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                                 Missed
                             </Text>
                         </View>
                     </View>
                 </View>
 
-                {/* How It Works Section */}
-                <View className={`mx-4 mb-8 p-4 rounded-xl ${isDark ? 'bg-[#1E1E1E]' : 'bg-gray-50'} shadow`}>
-                    <Text className={`text-lg font-semibold mb-3 ${isDark ? 'text-white' : 'text-black'}`}>
+                <View className={`mx-4 mb-8 p-5 rounded-xl ${isDark ? 'bg-[#1E1E1E]' : 'bg-gray-50'} shadow`}>
+                    <Text className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-black'}`}>
                         How It Works
                     </Text>
 
-                    <View className="ml-1 mb-2">
-                        <View className="flex-row items-center mb-3">
+                    <View className="ml-1">
+                        <View className="flex-row mb-3">
                             <Text className={`mr-2 font-bold ${isDark ? 'text-white' : 'text-black'}`}>1.</Text>
-                            <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <Text className={`flex-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                                 Tap any date on the calendar to log your progress
                             </Text>
                         </View>
 
-                        <View className="flex-row items-center mb-3">
+                        <View className="flex-row mb-3">
                             <Text className={`mr-2 font-bold ${isDark ? 'text-white' : 'text-black'}`}>2.</Text>
-                            <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <Text className={`flex-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                                 Select "Completed" if you succeeded with your habit
                             </Text>
                         </View>
 
-                        <View className="flex-row items-center mb-3">
+                        <View className="flex-row mb-3">
                             <Text className={`mr-2 font-bold ${isDark ? 'text-white' : 'text-black'}`}>3.</Text>
-                            <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <Text className={`flex-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                                 Select "Missed" if you didn't complete your habit
                             </Text>
                         </View>
 
-                        <View className="flex-row items-center mb-3">
+                        <View className="flex-row mb-3">
                             <Text className={`mr-2 font-bold ${isDark ? 'text-white' : 'text-black'}`}>4.</Text>
-                            <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <Text className={`flex-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                                 Green dates show successful days, red dates show missed days
                             </Text>
                         </View>
 
-                        <View className="flex-row items-center">
+                        <View className="flex-row">
                             <Text className={`mr-2 font-bold ${isDark ? 'text-white' : 'text-black'}`}>5.</Text>
-                            <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+                            <Text className={`flex-1 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
                                 Track your progress with the completion stats above
                             </Text>
                         </View>
@@ -328,14 +318,13 @@ const DisplayTracker = () => {
                 </View>
             </ScrollView>
 
-            {/* Status Update Modal */}
             <Modal
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
                 onRequestClose={() => setModalVisible(false)}
             >
-                <View className="flex-1 justify-end bg-black bg-opacity-50">
+                <View className="flex-1 justify-end bg-black/50">
                     <View className={`${isDark ? 'bg-[#1E1E1E]' : 'bg-white'} rounded-t-3xl p-6 shadow-lg`}>
                         <Text className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-black'}`}>
                             Update Status
@@ -347,7 +336,8 @@ const DisplayTracker = () => {
 
                         <View className="flex-row justify-between mb-6">
                             <TouchableOpacity
-                                className="py-4 px-6 rounded-xl bg-red-500 flex-1 mr-2 items-center shadow"
+                                className="py-4 px-6 rounded-xl flex-1 mr-2 items-center shadow"
+                                style={{ backgroundColor: errorColor }}
                                 onPress={() => handleStatusUpdate(false)}
                                 disabled={isLoading}
                             >
@@ -356,7 +346,8 @@ const DisplayTracker = () => {
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                className="py-4 px-6 rounded-xl bg-green-500 flex-1 ml-2 items-center shadow"
+                                className="py-4 px-6 rounded-xl flex-1 ml-2 items-center shadow"
+                                style={{ backgroundColor: successColor }}
                                 onPress={() => handleStatusUpdate(true)}
                                 disabled={isLoading}
                             >
@@ -378,7 +369,7 @@ const DisplayTracker = () => {
             </Modal>
 
             {isLoading && (
-                <View className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+                <View className="absolute inset-0 bg-black/30 flex items-center justify-center">
                     <ActivityIndicator size="large" color={colors.accent.primary} />
                 </View>
             )}
