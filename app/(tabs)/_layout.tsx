@@ -100,7 +100,7 @@ function TabLayout() {
                 <Tabs.Screen
                     name="tracker"
                     options={{
-                        title: "tracker",
+                        title: "Tracker",
                         tabBarIcon: ({ focused }) => getTabBarIcon(Feather, "target", focused),
                         tabBarItemStyle: {
                             width: tabWidth,
