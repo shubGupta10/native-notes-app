@@ -13,6 +13,24 @@ import {
 import * as Linking from 'expo-linking'
 import { openAuthSessionAsync } from "expo-web-browser";
 
+interface StatsData {
+  total: number;
+  success: number;
+  missed: number;
+  successPercentage: number;
+  missedPercentage: number;
+}
+
+interface StatsSuccess {
+  success: true;
+  data: StatsData;
+}
+
+interface StatsError {
+  success: false;
+  message: string;
+}
+
 interface UpdatedField {
   title?: string;
   category?: string;
@@ -481,6 +499,48 @@ export async function updateEntry(entryId: string, status: boolean, userId: stri
   } catch (error) {
     console.error('Update Entry Error:', error)
     return null
+  }
+}
+
+export async function fetchStats(trackerId: string, selectedMonth: number): Promise<StatsSuccess | StatsError> {
+  try {
+    const response = await databases.listDocuments(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_ENTRIES_COLLECTION_ID!,
+        [Query.equal("trackerId", trackerId)]
+    )
+
+    const entries = response.documents;
+
+    const filteredEntries = entries.filter((entry) => {
+      const date = new Date(entry.$createdAt);
+      return date.getMonth() === selectedMonth;
+    })
+
+    const successCount = filteredEntries.filter((e) => e.status === true).length;
+    const missedCount = filteredEntries.filter((e) => e.status === false).length;
+
+    // Avoid division by zero
+    const total = filteredEntries.length;
+    const successPercentage = total > 0 ? (successCount / total) * 100 : 0;
+    const missedPercentage = total > 0 ? (missedCount / total) * 100 : 0;
+
+    return {
+      success: true,
+      data: {
+        total: total,
+        success: successCount,
+        missed: missedCount,
+        successPercentage: successPercentage,
+        missedPercentage: missedPercentage,
+      }
+    }
+  } catch (error) {
+    console.error('Fetch Stats Error:', error)
+    return {
+      success: false,
+      message: "Failed to fetch stats."
+    }
   }
 }
 

@@ -1,5 +1,5 @@
 import { View, Text, Image, TouchableOpacity, ScrollView, useColorScheme } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link, useRouter } from 'expo-router'
 import FetchNotes from '@/components/FetchNotes'
@@ -85,7 +85,7 @@ const Index = () => {
               className="w-24 h-24 mb-4"
             />
             <Text className={`text-4xl font-bold ${isDark ? 'text-white' : 'text-gray-800'}`}>
-              LifeTrack
+            NoteNest
             </Text>
             <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-center mt-2 text-lg`}>
               Note-taking & habit tracking in one app

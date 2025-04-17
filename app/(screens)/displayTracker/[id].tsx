@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/useAuthStore"
 import { databases } from "@/lib/appwrite"
 import { Query } from "react-native-appwrite"
 import { useColorScheme } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import {Feather, Ionicons} from '@expo/vector-icons'
 import { format } from 'date-fns'
 import { MarkedDates, TrackerData, EntryStatus } from "@/types/trackerTypes"
 
@@ -144,6 +144,13 @@ const DisplayTracker = () => {
         }
     }, [id, userId])
 
+    const handleNavigateToStats = (id: string) => {
+        router.push({
+            pathname: "/(screens)/displayStats/[id]",
+            params: {id}
+        })
+    }
+
     const formattedDate = trackerData?.createdAt
         ? format(new Date(trackerData.createdAt), 'MMMM dd, yyyy')
         : null
@@ -211,24 +218,64 @@ const DisplayTracker = () => {
                     )}
                 </View>
 
+                {/* Stats button */}
                 <View className="flex-row mx-4 mt-4 mb-4">
-                    <View className={`flex-1 p-4 rounded-xl mr-2 ${isDark ? 'bg-[#1E1E1E]' : 'bg-gray-50'} shadow`}>
-                        <Text className={`text-lg font-bold ${isDark ? 'text-green-400' : 'text-green-600'}`}>
-                            {totalCompleted}
-                        </Text>
-                        <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                            Completed
-                        </Text>
-                    </View>
+                    <TouchableOpacity
+                        onPress={() => handleNavigateToStats(trackerData?.id as string)}
+                        activeOpacity={0.6}
+                        className={`flex-1 rounded-xl border-2 ${isDark ? 'bg-[#252525] border-[#383838]' : 'bg-white border-gray-200'}`}
+                        style={{
+                            shadowColor: colors.shadow.color,
+                            shadowOpacity: colors.shadow.opacity,
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowRadius: 5,
+                            elevation: 4, // Android shadow
+                        }}
+                    >
+                        <View className="p-4">
+                            <View className="flex-row items-center justify-between">
+                                <View>
+                                    <Text
+                                        className="text-lg font-bold"
+                                        style={{ color: colors.text.primary }}
+                                    >
+                                        Check Statistics
+                                    </Text>
+                                    <Text
+                                        className="text-sm mt-1"
+                                        style={{ color: colors.text.secondary }}
+                                    >
+                                        View detailed progress analysis
+                                    </Text>
+                                </View>
+                                <View
+                                    className={`p-3 rounded-lg`}
+                                    style={{ backgroundColor: colors.accent.primary + '20' }} // Semi-transparent accent color
+                                >
+                                    <Feather
+                                        name="bar-chart-2"
+                                        size={24}
+                                        color={colors.accent.primary}
+                                    />
+                                </View>
+                            </View>
+                        </View>
 
-                    <View className={`flex-1 p-4 rounded-xl ml-2 ${isDark ? 'bg-[#1E1E1E]' : 'bg-gray-50'} shadow`}>
-                        <Text className={`text-lg font-bold ${isDark ? 'text-red-400' : 'text-red-600'}`}>
-                            {totalMissed}
-                        </Text>
-                        <Text className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                            Missed
-                        </Text>
-                    </View>
+                        {/* Click Here Indicator */}
+                        <View
+                            className={`py-2 px-4 flex-row items-center justify-center rounded-b-xl ${isDark ? 'bg-[#333]' : 'bg-gray-100'}`}
+                            style={{ backgroundColor: colors.accent.primary }}
+                        >
+                            <Ionicons
+                                name="arrow-forward-circle"
+                                size={16}
+                                color="#FFFFFF"
+                            />
+                            <Text className="text-white font-semibold ml-1">
+                                Tap to View Statistics
+                            </Text>
+                        </View>
+                    </TouchableOpacity>
                 </View>
 
                 <View className={`mx-4 mb-6 p-5 rounded-xl ${isDark ? 'bg-[#1E1E1E]' : 'bg-gray-50'} shadow`}>
