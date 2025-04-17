@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bb9d821f-1628-45e8-aed1-e5f13d213ae4" name="Changes" comment="Changes App Icon and Splash Icon" />
+    <list default="true" id="bb9d821f-1628-45e8-aed1-e5f13d213ae4" name="Changes" comment="changes into content">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -17,6 +19,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "shubGupta10"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/shubGupta10/native-notes-app.git",
+    "accountId": "ee19b077-982a-407b-aec9-cdd969805b7a"
+  }
+}]]></component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="ProjectErrors" />
   </component>
@@ -160,7 +174,7 @@
       <workItem from="1744697849461" duration="8398000" />
       <workItem from="1744872149934" duration="500000" />
       <workItem from="1744872732445" duration="327000" />
-      <workItem from="1744873194785" duration="5232000" />
+      <workItem from="1744873194785" duration="6737000" />
     </task>
     <task id="LOCAL-00001" summary="Changes App Icon and Splash Icon">
       <option name="closed" value="true" />
@@ -170,7 +184,15 @@
       <option name="project" value="LOCAL" />
       <updated>1744467000810</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="changes into content">
+      <option name="closed" value="true" />
+      <created>1744884031278</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1744884031278</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -192,6 +214,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Changes App Icon and Splash Icon" />
-    <option name="LAST_COMMIT_MESSAGE" value="Changes App Icon and Splash Icon" />
+    <MESSAGE value="changes into content" />
+    <option name="LAST_COMMIT_MESSAGE" value="changes into content" />
   </component>
 </project>
