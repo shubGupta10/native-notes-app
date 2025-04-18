@@ -5,12 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bb9d821f-1628-45e8-aed1-e5f13d213ae4" name="Changes" comment="Fixed warnings">
-      <change afterPath="$PROJECT_DIR$/app/(screens)/FeedbackAndContact.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/EditProfileModal.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/components/PrivacyPolicyModal.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/(tabs)/profile.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/profile.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/appwrite.ts" beforeDir="false" afterPath="$PROJECT_DIR$/lib/appwrite.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/(tabs)/create.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/(tabs)/create.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -183,7 +182,7 @@
       <workItem from="1744873194785" duration="8638000" />
       <workItem from="1744896105957" duration="1984000" />
       <workItem from="1744901662401" duration="3203000" />
-      <workItem from="1744956590507" duration="3282000" />
+      <workItem from="1744956590507" duration="5045000" />
     </task>
     <task id="LOCAL-00001" summary="Changes App Icon and Splash Icon">
       <option name="closed" value="true" />
