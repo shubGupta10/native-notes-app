@@ -544,3 +544,35 @@ export async function fetchStats(trackerId: string, selectedMonth: number): Prom
   }
 }
 
+export async function updateUserProfile(userId: string, userData: any) {
+  try {
+    const response = await databases.updateDocument(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_USERS_COLLECTION_ID!,
+        userId,
+        userData
+    )
+    return response;
+  }catch (error){
+    console.error('Update User Profile Error:', error)
+  }
+}
+
+export async function FeedbackAndContact(name: string, email: string, message: string){
+  try {
+    const res = await databases.createDocument(
+        process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+        process.env.EXPO_PUBLIC_APPWRITE_FEEDBACKANDCONTACT_COLLECTION_ID!,
+        ID.unique(),
+        {
+          name,
+          email,
+          message,
+        },
+    )
+    return res;
+  }catch (error){
+    console.error('Feedback and Contact Error:', error)
+  }
+}
+

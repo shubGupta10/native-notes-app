@@ -7,18 +7,26 @@ import {
     View,
     ActivityIndicator,
     useColorScheme,
+    Modal,
+    TextInput,
+    Keyboard,
+    TouchableWithoutFeedback,
+    KeyboardAvoidingView,
+    Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useEffect, useState } from "react";
+import {ReactNode, useEffect, useState} from "react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import AuthWrapper from "@/components/AuthWrapper";
 import { appColors } from "@/lib/appColors";
 import { StatusBar } from "expo-status-bar";
+import EditProfileModal from "@/components/EditProfileModal";
+import PrivacyPolicyModal from "@/components/PrivacyPolicyModal";
 
 interface SettingsItemProp {
-    icon: React.ReactNode;
+    icon: ReactNode;
     title: string;
     subtitle?: string;
     onPress?: () => void;
@@ -34,6 +42,10 @@ const Profile = () => {
     const colorScheme = useColorScheme();
     const isDark = colorScheme === 'dark';
     const colors = isDark ? appColors.dark : appColors.light;
+
+    // Modal states
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [isPrivacyModalVisible, setIsPrivacyModalVisible] = useState(false);
 
     // Stats for display
     const [stats, setStats] = useState({
@@ -58,23 +70,23 @@ const Profile = () => {
     }, []);
 
     const SettingsItem = ({
-        icon,
-        title,
-        subtitle,
-        onPress,
-        textStyle,
-        showArrow = true,
-        iconBgColor
-    }: SettingsItemProp) => (
+                              icon,
+                              title,
+                              subtitle,
+                              onPress,
+                              textStyle,
+                              showArrow = true,
+                              iconBgColor
+                          }: SettingsItemProp) => (
         <TouchableOpacity
             onPress={onPress}
             className="flex flex-row items-center justify-between py-4 px-4 border-b"
             style={{ borderBottomColor: colors.border }}
         >
             <View className="flex flex-row items-center gap-4">
-                <View 
-                    className="p-2 rounded-full" 
-                    style={{ 
+                <View
+                    className="p-2 rounded-full"
+                    style={{
                         backgroundColor: iconBgColor || colors.card,
                         opacity: iconBgColor ? 0.2 : 1
                     }}
@@ -152,7 +164,21 @@ const Profile = () => {
         router.push('/login');
     };
 
-    // Show loading indicator while initially checking authentication
+    const handleEditProfile = () => {
+        setIsEditModalVisible(true);
+    };
+
+    const handleProfileUpdate = async () => {
+        try {
+            await fetchUser();
+            Alert.alert("Success", "Profile updated successfully");
+        } catch (error) {
+            console.error("Error updating profile:", error);
+            Alert.alert("Error", "Failed to update profile");
+        }
+    };
+
+    // Show a loading indicator while initially checking authentication
     if (isInitiallyLoading) {
         return (
             <View className="flex-1 justify-center items-center" style={{ backgroundColor: colors.background }}>
@@ -204,15 +230,15 @@ const Profile = () => {
                         My Profile
                     </Text>
                     <View className="flex-row">
-                        <TouchableOpacity 
-                            className="p-2 rounded-full mr-2" 
+                        <TouchableOpacity
+                            className="p-2 rounded-full mr-2"
                             style={{ backgroundColor: colors.card }}
                             onPress={() => Alert.alert("Settings", "Settings page coming soon!")}
                         >
                             <Feather name="settings" size={20} color={colors.text.primary} />
                         </TouchableOpacity>
-                        <TouchableOpacity 
-                            className="p-2 rounded-full" 
+                        <TouchableOpacity
+                            className="p-2 rounded-full"
                             style={{ backgroundColor: colors.card }}
                             onPress={() => Alert.alert("Notifications", "No new notifications")}
                         >
@@ -228,12 +254,12 @@ const Profile = () => {
                         <TouchableOpacity
                             className="absolute top-3 right-3 p-2 rounded-full"
                             style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
-                            onPress={() => Alert.alert("Edit Profile", "Profile editing coming soon!")}
+                            onPress={handleEditProfile}
                         >
                             <Feather name="edit" size={16} color="white" />
                         </TouchableOpacity>
                     </View>
-                    
+
                     {/* Profile Info */}
                     <View className="px-6 pb-6">
                         <View className="flex flex-row items-end relative -top-12 mb-2">
@@ -249,11 +275,12 @@ const Profile = () => {
                                         backgroundColor: colors.background,
                                         borderColor: colors.border
                                     }}
+                                    onPress={() => Alert.alert("Change Photo", "This feature is coming soon")}
                                 >
                                     <Feather name="camera" size={16} color={colors.text.primary} />
                                 </TouchableOpacity>
                             </View>
-                            
+
                             <View className="ml-3 flex-1 relative -top-6">
                                 <Text className="text-2xl font-rubik-bold" style={{ color: colors.text.primary }}>
                                     {user.name}
@@ -271,19 +298,17 @@ const Profile = () => {
                                 </View>
                             </View>
                         </View>
-                        
-                        
+
                         <View
-                            className=" border-t"
+                            className="border-t"
                             style={{ borderTopColor: colors.border }}
                         >
-                            <Text className="text-sm" style={{ color: colors.text.tertiary }}>
+                            <Text className="text-sm mt-2" style={{ color: colors.text.tertiary }}>
                                 Member since {user.registration ? formatDate(user.registration) : "N/A"}
                             </Text>
                         </View>
                     </View>
                 </View>
-
 
                 {/* Settings Sections */}
                 <View className="px-4">
@@ -315,7 +340,7 @@ const Profile = () => {
                             onPress={() => router.push('/create')}
                         />
                     </View>
-                    
+
                     <Text className="text-base font-rubik-medium mb-3" style={{ color: colors.text.secondary }}>
                         Account Settings
                     </Text>
@@ -325,23 +350,16 @@ const Profile = () => {
                             iconBgColor="#e67e22"
                             title="Edit Profile"
                             subtitle="Update your personal information"
-                            onPress={() => Alert.alert("Edit Profile", "This feature is coming soon")}
+                            onPress={handleEditProfile}
                         />
 
-                        <SettingsItem
-                            icon={<Feather name="shield" size={20} color="#34495e" />}
-                            iconBgColor="#34495e"
-                            title="Privacy & Security"
-                            subtitle="Manage your account security"
-                            onPress={() => Alert.alert("Security", "This feature is coming soon")}
-                        />
 
                         <SettingsItem
-                            icon={<Feather name="help-circle" size={20} color="#7f8c8d" />}
+                            icon={<Feather name="message-circle" size={20} color="#7f8c8d" />}
                             iconBgColor="#7f8c8d"
-                            title="Help & Support"
-                            subtitle="Get assistance and FAQs"
-                            onPress={() => Alert.alert("Help", "This feature is coming soon")}
+                            title="Feedback & Contact"
+                            subtitle="Tell us what you think or get in touch"
+                            onPress={() => router.push("/(screens)/FeedbackAndContact")}
                         />
 
                         <SettingsItem
@@ -354,8 +372,21 @@ const Profile = () => {
                             onPress={handleLogout}
                         />
                     </View>
+
+                    <Text className="text-base font-rubik-medium mb-3" style={{ color: colors.text.secondary }}>
+                        Legal
+                    </Text>
+                    <View className="rounded-xl overflow-hidden mb-6" style={{ backgroundColor: colors.card }}>
+                        <SettingsItem
+                            icon={<Feather name="lock" size={20} color="#2ecc71" />}
+                            iconBgColor="#2ecc71"
+                            title="Privacy Policy"
+                            subtitle="How we handle your data"
+                            onPress={() => setIsPrivacyModalVisible(true)}
+                        />
+                    </View>
                 </View>
-                
+
                 {/* App info */}
                 <View className="px-4 items-center mt-2">
                     <Text className="text-xs" style={{ color: colors.text.tertiary }}>
@@ -363,6 +394,22 @@ const Profile = () => {
                     </Text>
                 </View>
             </ScrollView>
+
+            {/* Edit Profile Modal */}
+            <EditProfileModal
+                visible={isEditModalVisible}
+                onClose={() => setIsEditModalVisible(false)}
+                user={user}
+                colors={colors}
+                onSuccess={handleProfileUpdate}
+            />
+
+            {/* Privacy Policy Modal */}
+            <PrivacyPolicyModal
+                visible={isPrivacyModalVisible}
+                onClose={() => setIsPrivacyModalVisible(false)}
+                colors={colors}
+            />
         </SafeAreaView>
     );
 };
